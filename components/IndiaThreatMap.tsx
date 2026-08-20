@@ -191,7 +191,7 @@ export default function IndiaThreatMap() {
         {/* Note: Removed 'blank' prop to show Carto basemap underneath */}
         <Map ref={mapRef} center={[78.9629, 22.5937]} zoom={4}>
           <MapGeoJSON
-            data="/india-states.geojson"
+            data={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/india-states.geojson`}
             promoteId="NAME_1"
             interactive={true}
             fillPaint={{
