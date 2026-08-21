@@ -32,7 +32,7 @@ export const LOCATIONS: LocationDef[] = [
 ];
 
 export class VillageScene extends Phaser.Scene {
-  private player!: Phaser.GameObjects.Rectangle;
+  private player!: Phaser.Physics.Arcade.Sprite;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: any;
   private walls!: Phaser.Physics.Arcade.StaticGroup;
@@ -47,34 +47,26 @@ export class VillageScene extends Phaser.Scene {
   }
 
   preload() {
-    // Grass
-    const graphics = this.make.graphics({ x: 0, y: 0 });
-    graphics.fillStyle(0x4ade80);
-    graphics.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-    // Add some texture to grass
-    graphics.fillStyle(0x22c55e);
-    graphics.fillRect(5, 5, 4, 4);
-    graphics.fillRect(25, 20, 4, 4);
-    graphics.generateTexture('grass', TILE_SIZE, TILE_SIZE);
-    graphics.clear();
+    const bp = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    this.load.image('grass', bp + '/assets/grass_tile.png');
+    this.load.image('road', bp + '/assets/road_tile.png');
+    this.load.image('doormat', bp + '/assets/doormat.png');
+    this.load.image('tree', bp + '/assets/tree.png');
+    this.load.image('bench', bp + '/assets/bench.png');
 
-    // Road (Center)
-    graphics.fillStyle(0x94a3b8);
-    graphics.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-    graphics.generateTexture('road', TILE_SIZE, TILE_SIZE);
-    graphics.clear();
+    // Buildings
+    this.load.image('bldg_bank', bp + '/assets/bldg_bank.png');
+    this.load.image('bldg_postoffice', bp + '/assets/bldg_postoffice.png');
+    this.load.image('bldg_shop', bp + '/assets/bldg_shop.png');
+    this.load.image('bldg_hospital', bp + '/assets/bldg_hospital.png');
+    this.load.image('bldg_gov', bp + '/assets/bldg_gov.png');
+    this.load.image('bldg_bus', bp + '/assets/bldg_bus.png');
 
-    // Player
-    graphics.fillStyle(0x1e3a8a); // dark blue character
-    graphics.fillRect(0, 0, TILE_SIZE - 10, TILE_SIZE - 10);
-    graphics.generateTexture('player', TILE_SIZE - 10, TILE_SIZE - 10);
-    graphics.clear();
-
-    // Trigger zone (invisible, but we might draw a mat)
-    graphics.fillStyle(0xfde047, 0.5);
-    graphics.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-    graphics.generateTexture('trigger', TILE_SIZE, TILE_SIZE);
-    graphics.clear();
+    // Player Walk Cycle
+    this.load.image('player_0', bp + '/assets/player_walk_0.png');
+    this.load.image('player_1', bp + '/assets/player_walk_1.png');
+    this.load.image('player_2', bp + '/assets/player_walk_2.png');
+    this.load.image('player_3', bp + '/assets/player_walk_3.png');
   }
 
   create() {
@@ -91,24 +83,60 @@ export class VillageScene extends Phaser.Scene {
       for (let y = 0; y < GRID_HEIGHT; y++) {
         // Road in the middle (x = 8, 9, 10, 11)
         if (x >= 8 && x <= 11) {
-            this.add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 'road');
+            this.add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 'road').setDisplaySize(TILE_SIZE, TILE_SIZE);
         } else {
-            this.add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 'grass');
+            this.add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 'grass').setDisplaySize(TILE_SIZE, TILE_SIZE);
         }
       }
     }
+
+    // Add Ambient Scenery (Trees and Benches)
+    const sceneryCoords = [
+        { x: 1, y: 14, type: 'tree' },
+        { x: 1, y: 0, type: 'tree' },
+        { x: 7, y: 3, type: 'tree' },
+        { x: 7, y: 11, type: 'tree' },
+        { x: 12, y: 1, type: 'tree' },
+        { x: 18, y: 5, type: 'tree' },
+        { x: 18, y: 10, type: 'tree' },
+        { x: 12, y: 14, type: 'bench' },
+        { x: 7, y: 14, type: 'bench' },
+    ];
+    sceneryCoords.forEach(s => {
+        const cx = s.x * TILE_SIZE + TILE_SIZE/2;
+        const cy = s.y * TILE_SIZE + TILE_SIZE/2;
+        if (s.type === 'tree') {
+            this.add.image(cx, cy - 20, 'tree').setDepth(10); // draw above player
+        } else {
+            this.add.image(cx, cy, 'bench');
+        }
+    });
 
     // Build Locations
     LOCATIONS.forEach(loc => {
         const cx = loc.x * TILE_SIZE + (loc.w * TILE_SIZE) / 2;
         const cy = loc.y * TILE_SIZE + (loc.h * TILE_SIZE) / 2;
 
-        // Base structure
-        const bldg = this.add.rectangle(cx, cy, loc.w * TILE_SIZE, loc.h * TILE_SIZE, loc.color);
-        bldg.setStrokeStyle(2, 0x000000);
+        // Base structure (Sprite instead of rectangle)
+        this.add.image(cx, cy, `bldg_${loc.id}`).setDepth(1);
 
-        // Add Label
-        const txt = this.add.text(cx, cy - 10, loc.name, { color: '#000', fontSize: '14px', fontStyle: 'bold' }).setOrigin(0.5);
+        // Icon label setup based on building type
+        const icons: Record<string, string> = {
+            'bank': '₹',
+            'postoffice': '✉',
+            'shop': '🛒',
+            'hospital': '✚',
+            'gov': '🏛',
+            'bus': '🚌'
+        };
+        const iconChar = icons[loc.id] || '🏠';
+
+        // Add Label & Icon above building
+        const labelY = cy - (loc.h * TILE_SIZE) / 2 - 15;
+        // White banner background for text readability
+        const textBg = this.add.rectangle(cx, labelY, loc.w * TILE_SIZE, 24, 0xffffff, 0.8).setDepth(2);
+        textBg.setStrokeStyle(2, 0x000000);
+        this.add.text(cx, labelY, `${iconChar} ${loc.name}`, { color: '#000', fontSize: '14px', fontStyle: 'bold' }).setOrigin(0.5).setDepth(2);
 
         // Entrance / Trigger logic
         if (loc.type === 'building') {
@@ -129,8 +157,8 @@ export class VillageScene extends Phaser.Scene {
                 ty = cy;
             }
 
-            // Draw a little door mat
-            this.add.rectangle(tx, ty, TILE_SIZE, TILE_SIZE, 0xfde047).setAlpha(0.5);
+            // Draw Doormat Sprite
+            this.add.image(tx, ty, 'doormat');
 
             const trigger = this.triggers.create(tx, ty, undefined) as Phaser.Physics.Arcade.Sprite;
             trigger.setSize(TILE_SIZE, TILE_SIZE);
@@ -138,8 +166,6 @@ export class VillageScene extends Phaser.Scene {
             trigger.setData('locId', loc.id);
 
         } else if (loc.type === 'open') {
-            // Bus stand - open air. Add a little bench
-            this.add.rectangle(cx, cy + 10, loc.w * TILE_SIZE - 20, 10, 0x8b5cf6);
             // It doesn't have walls blocking you, the whole thing is a trigger
             const trigger = this.triggers.create(cx, cy, undefined) as Phaser.Physics.Arcade.Sprite;
             trigger.setSize(loc.w * TILE_SIZE, loc.h * TILE_SIZE);
@@ -149,7 +175,21 @@ export class VillageScene extends Phaser.Scene {
     });
 
     // Player starts on the road at the bottom
-    this.player = this.physics.add.sprite(10 * TILE_SIZE + TILE_SIZE/2, 14 * TILE_SIZE + TILE_SIZE/2, 'player') as any;
+    this.player = this.physics.add.sprite(10 * TILE_SIZE + TILE_SIZE/2, 14 * TILE_SIZE + TILE_SIZE/2, 'player_0') as any;
+    this.player.setDepth(5);
+
+    // Create walk animation
+    this.anims.create({
+        key: 'walk',
+        frames: [
+            { key: 'player_0' },
+            { key: 'player_1' },
+            { key: 'player_2' },
+            { key: 'player_3' }
+        ],
+        frameRate: 8,
+        repeat: -1
+    });
 
     this.physics.add.collider(this.player, this.walls);
 
@@ -179,11 +219,32 @@ export class VillageScene extends Phaser.Scene {
     body.setVelocity(0);
 
     if (this.cursors) {
-        if (this.cursors.left.isDown || this.wasd.A.isDown) body.setVelocityX(-speed);
-        else if (this.cursors.right.isDown || this.wasd.D.isDown) body.setVelocityX(speed);
+        let isMoving = false;
 
-        if (this.cursors.up.isDown || this.wasd.W.isDown) body.setVelocityY(-speed);
-        else if (this.cursors.down.isDown || this.wasd.S.isDown) body.setVelocityY(speed);
+        if (this.cursors.left.isDown || this.wasd.A.isDown) {
+            body.setVelocityX(-speed);
+            isMoving = true;
+        } else if (this.cursors.right.isDown || this.wasd.D.isDown) {
+            body.setVelocityX(speed);
+            isMoving = true;
+        }
+
+        if (this.cursors.up.isDown || this.wasd.W.isDown) {
+            body.setVelocityY(-speed);
+            isMoving = true;
+        } else if (this.cursors.down.isDown || this.wasd.S.isDown) {
+            body.setVelocityY(speed);
+            isMoving = true;
+        }
+
+        if (isMoving) {
+            if (!this.player.anims.isPlaying) {
+                this.player.play('walk');
+            }
+        } else {
+            this.player.stop();
+            this.player.setTexture('player_0');
+        }
     }
 
     // World bounds

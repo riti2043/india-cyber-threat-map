@@ -30,18 +30,18 @@ export default function VillageGame() {
 
   return (
     <div className="w-full max-w-[800px] mx-auto flex flex-col gap-4">
-      {/* HUD for Badges */}
-      <div className="bg-slate-900 p-4 rounded border border-slate-700 flex gap-4 overflow-x-auto items-center min-h-[80px]">
-         <span className="font-bold text-slate-400 whitespace-nowrap">My Badges:</span>
-         {badges.length === 0 && <span className="text-slate-600 italic">None yet. Explore the village!</span>}
+      {/* HUD for Badges - Cozy Light Theme */}
+      <div className="bg-white p-4 rounded-xl shadow-md border border-slate-200 flex gap-4 overflow-x-auto items-center min-h-[80px]">
+         <span className="font-bold text-slate-700 whitespace-nowrap">🏆 My Badges:</span>
+         {badges.length === 0 && <span className="text-slate-400 italic">None yet. Explore the village!</span>}
          {badges.map(b => (
-            <span key={b} className="px-3 py-1 bg-yellow-600/20 text-yellow-400 border border-yellow-600 rounded-full text-sm font-bold whitespace-nowrap">
-                {b}
+            <span key={b} className="px-4 py-2 bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-300 rounded-full text-sm font-bold whitespace-nowrap shadow-sm">
+                🏅 {b}
             </span>
          ))}
       </div>
 
-      <div className="border rounded-lg overflow-hidden bg-slate-900 text-white relative h-[600px] shadow-lg">
+      <div className="border-4 border-slate-300 rounded-2xl overflow-hidden bg-sky-50 text-white relative h-[600px] shadow-xl">
         <PhaserGame
             onTrigger={handleTrigger}
             isTaskOpen={activeLocation !== null}
