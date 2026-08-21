@@ -1,5 +1,5 @@
 import IndiaThreatMap from "@/components/IndiaThreatMap";
-import DungeonGame from "@/components/game/DungeonGame";
+import VillageGame from "@/components/game/VillageGame";
 
 export default function Home() {
   return (
@@ -12,8 +12,8 @@ export default function Home() {
       </div>
 
       <div className="w-full max-w-5xl mt-16 mb-8">
-        <h2 className="text-3xl font-bold mb-8 text-zinc-900 dark:text-zinc-100 text-center">Mini-Game: Escape the Breach</h2>
-        <DungeonGame />
+        <h2 className="text-3xl font-bold mb-8 text-zinc-900 dark:text-zinc-100 text-center">Digital Gully</h2>
+        <VillageGame />
       </div>
     </div>
   );

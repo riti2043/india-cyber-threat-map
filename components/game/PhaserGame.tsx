@@ -2,17 +2,14 @@
 
 import React, { useEffect, useRef } from 'react';
 import type { Game } from 'phaser';
+import type { LocationId } from './VillageScene';
 
 export default function PhaserGame({
-  levelConfig,
-  onInteract,
-  onExit,
-  doorUnlocked,
+  onTrigger,
+  isTaskOpen,
 }: {
-  levelConfig: any;
-  onInteract: () => void;
-  onExit: () => void;
-  doorUnlocked: boolean;
+  onTrigger: (locId: LocationId) => void;
+  isTaskOpen: boolean;
 }) {
   const gameRef = useRef<Game | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,10 +17,9 @@ export default function PhaserGame({
   useEffect(() => {
     let isMounted = true;
 
-    // We dynamically import Phaser and the Scene to avoid SSR issues
     const initPhaser = async () => {
       const Phaser = await import('phaser');
-      const { DungeonScene } = await import('./DungeonScene');
+      const { VillageScene } = await import('./VillageScene');
 
       if (!isMounted || !containerRef.current) return;
 
@@ -32,8 +28,8 @@ export default function PhaserGame({
         parent: containerRef.current,
         width: 800,
         height: 600,
-        backgroundColor: '#1a1a1a',
-        scene: [DungeonScene],
+        backgroundColor: '#4ade80',
+        scene: [VillageScene],
         physics: {
           default: 'arcade',
           arcade: {
@@ -44,11 +40,11 @@ export default function PhaserGame({
 
       gameRef.current = new Phaser.Game(config);
 
-      // Pass config and callbacks to the scene when it's ready
       gameRef.current.events.on('ready', () => {
-        const scene = gameRef.current?.scene.getScene('DungeonScene') as any;
+        const scene = gameRef.current?.scene.getScene('VillageScene') as any;
         if (scene) {
-          scene.setLevel(levelConfig, onInteract, onExit, doorUnlocked);
+          scene.setCallbacks(onTrigger);
+          scene.setTaskOpen(isTaskOpen);
         }
       });
     };
@@ -62,18 +58,17 @@ export default function PhaserGame({
         gameRef.current = null;
       }
     };
-  }, []); // Run once on mount
+  }, []);
 
-  // Update scene when level config or door state changes
+  // Sync task open state to pause movement
   useEffect(() => {
     if (gameRef.current) {
-      const scene = gameRef.current.scene.getScene('DungeonScene') as any;
-      if (scene && scene.setLevel) {
-         // Pause the scene slightly to reset if the level changed
-         scene.setLevel(levelConfig, onInteract, onExit, doorUnlocked);
+      const scene = gameRef.current.scene.getScene('VillageScene') as any;
+      if (scene && scene.setTaskOpen) {
+         scene.setTaskOpen(isTaskOpen);
       }
     }
-  }, [levelConfig, doorUnlocked, onInteract, onExit]);
+  }, [isTaskOpen]);
 
   return <div ref={containerRef} className="w-full h-full flex items-center justify-center bg-black" />;
 }
