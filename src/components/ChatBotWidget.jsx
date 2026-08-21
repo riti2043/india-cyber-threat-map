@@ -212,7 +212,7 @@ export default function ChatBotWidget({
   };
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden text-white" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="w-full h-full flex flex-col overflow-hidden text-white bg-slate-900 border border-indigo-500/40 rounded-2xl shadow-2xl" style={{ fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
       <div className="p-3 bg-slate-800/90 border-b border-slate-700 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">

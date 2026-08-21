@@ -663,12 +663,12 @@ export default function App() {
 
       {/* Floating Glass Chat Drawer */}
       {isFloatingChatOpen && (
-        <div className="floating-chat-drawer">
-          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingBottom: '6px' }}>
+        <div className="floating-chat-drawer" style={{ padding: '0px', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
             <button 
               type="button" 
               className="compact-btn" 
-              style={{ padding: '2px 8px', borderColor: 'var(--neon-magenta)', color: 'var(--neon-magenta)' }}
+              style={{ padding: '2px 8px', borderColor: 'var(--neon-magenta)', color: 'var(--neon-magenta)', background: 'rgba(15,18,36,0.8)' }}
               onClick={() => setIsFloatingChatOpen(false)}
             >
               <i className="fa-solid fa-xmark"></i> Close
