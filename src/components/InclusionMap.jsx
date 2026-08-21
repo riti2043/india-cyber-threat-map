@@ -1,343 +1,368 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import * as maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import {
+  INDIA_INCLUSION_DATA,
+  STATE_CENTROIDS,
+  SCHEMES,
+  UI_TRANSLATIONS,
+  STATE_NAMES,
+  getChoroplethColor,
+} from '../india-inclusion-data';
 
-const stateDirectories = {
-  KA: {
-    name: "Karnataka (KA)",
-    hindiName: "ಕರ್ನಾಟಕ",
-    kannadaName: "ಕರ್ನಾಟಕ",
-    score: "86% (Very High)",
-    contacts: [
-      { label: "Karnataka Disabled Welfare", phone: "080-22863333" },
-      { label: "Emergency Medical Support (KA)", phone: "108" },
-      { label: "State Elder/Pension Helpline", phone: "14567" },
-      { label: "NIMHANS Mental Health Support", phone: "1800-599-0019" }
-    ],
-    downloads: [
-      { label: "KA Pension Guidelines (PDF)", file: "KA_Pension_Guidelines_2026.pdf" },
-      { label: "KA Medical Welfare Form (PDF)", file: "KA_Medical_Aid_Form.pdf" }
-    ]
-  },
-  MH: {
-    name: "Maharashtra (MH)",
-    hindiName: "महाराष्ट्र",
-    kannadaName: "ಮಹಾರಾಷ್ಟ್ರ",
-    score: "78% (High)",
-    contacts: [
-      { label: "MH Disabled Welfare Department", phone: "022-22025211" },
-      { label: "State Social Justice Help Desk", phone: "1800-222-012" },
-      { label: "Emergency Healthcare Support", phone: "104" }
-    ],
-    downloads: [
-      { label: "MH Disability Pension Scheme (PDF)", file: "MH_Pension_Scheme_2026.pdf" },
-      { label: "MH Senior Citizen Card Guide (PDF)", file: "MH_Senior_Card.pdf" }
-    ]
-  },
-  UP: {
-    name: "Uttar Pradesh (UP)",
-    hindiName: "उत्तर प्रदेश",
-    kannadaName: "ಉತ್ತರ ಪ್ರದೇಶ",
-    score: "58% (Moderate)",
-    contacts: [
-      { label: "UP Divyangjan Kalyan Vibhag", phone: "1800-180-1995" },
-      { label: "UP State Welfare Board", phone: "0522-2286120" },
-      { label: "Citizen Emergency Response", phone: "112" }
-    ],
-    downloads: [
-      { label: "UP Viklang Pension Application Form (PDF)", file: "UP_Viklang_Pension.pdf" },
-      { label: "UP Divyang Scheme Handbook (PDF)", file: "UP_Divyang_Handbook.pdf" }
-    ]
-  },
-  RJ: {
-    name: "Rajasthan (RJ)",
-    hindiName: "राजस्थान",
-    kannadaName: "ರಾಜಸ್ಥಾನ",
-    score: "66% (Moderate)",
-    contacts: [
-      { label: "Rajasthan Social Justice Dept", phone: "0141-2226602" },
-      { label: "State Welfare Toll-Free Helpline", phone: "181" },
-      { label: "Emergency Medical Service (RJ)", phone: "108" }
-    ],
-    downloads: [
-      { label: "RJ Social Security Schemes Guide (PDF)", file: "RJ_Social_Security_Guidelines.pdf" }
-    ]
-  },
-  GJ: {
-    name: "Gujarat (GJ)",
-    hindiName: "गुजरात",
-    kannadaName: "ಗುಜರಾತ್",
-    score: "74% (High)",
-    contacts: [
-      { label: "Gujarat Social Defense Dept", phone: "079-23251211" },
-      { label: "State Disability Commissioner office", phone: "079-23253724" }
-    ],
-    downloads: [
-      { label: "GJ Divyang Welfare Schemes (PDF)", file: "GJ_Divyang_Welfare.pdf" }
-    ]
-  },
-  HR: {
-    name: "Haryana & Delhi (HR/DL)",
-    hindiName: "हरियाणा और दिल्ली",
-    kannadaName: "ಹರಿಯಾಣ ಮತ್ತು ದೆಹಲಿ",
-    score: "82% (High)",
-    contacts: [
-      { label: "Delhi Social Welfare Help", phone: "011-23381395" },
-      { label: "Delhi Govt Toll-Free Service", phone: "1031" },
-      { label: "National Disabled Helpline Center", phone: "1800-110-193" }
-    ],
-    downloads: [
-      { label: "DL Disability Certificate Procedure (PDF)", file: "DL_Certificate_Guide.pdf" },
-      { label: "DL Widow & Old Age Pension Form (PDF)", file: "DL_Pension_Form.pdf" }
-    ]
-  },
-  DEFAULT: {
-    name: "National Support Center (IN)",
-    hindiName: "राष्ट्रीय सहायता केंद्र",
-    kannadaName: "ರಾಷ್ಟ್ರೀಯ ಸಹಾಯ ಕೇಂದ್ರ",
-    score: "65% (Moderate)",
-    contacts: [
-      { label: "National Social Security Portal", phone: "1800-11-1967" },
-      { label: "Ministry of Social Justice Helpline", phone: "1967" },
-      { label: "National Disaster Management Helpline", phone: "1078" }
-    ],
-    downloads: [
-      { label: "Universal Disability ID Card Manual (PDF)", file: "UDID_Card_Manual.pdf" },
-      { label: "Pradhan Mantri Welfare Schemes Guide (PDF)", file: "PM_Welfare_Handbook.pdf" }
-    ]
-  }
-};
+export default function InclusionMap({ lang = 'en', t }) {
+  const [selectedState, setSelectedState] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
+  const selectedFeatureIdRef = useRef(null);
 
-export default function InclusionMap({ t, lang, speakFeedback }) {
-  const [selectedState, setSelectedState] = useState("KA");
+  const ui = UI_TRANSLATIONS[lang] || UI_TRANSLATIONS.en;
 
-  const handleStateClick = (stateCode) => {
-    setSelectedState(stateCode);
-    const data = stateDirectories[stateCode] || stateDirectories["DEFAULT"];
-    let name = data.name;
-    if (lang === "hi") name = data.hindiName || data.name;
-    if (lang === "kn") name = data.kannadaName || data.name;
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
-    speakFeedback(`Loaded contacts directory for ${name}. Inclusion index is ${data.score}`);
+  const stateList = useMemo(() => {
+    const list = Object.entries(INDIA_INCLUSION_DATA).map(([name, data]) => {
+      const stateTrans = STATE_NAMES[name];
+      const displayName = stateTrans ? (stateTrans[lang] || name) : name;
+      return {
+        id: name,
+        displayName,
+        englishName: name,
+        pct: data.disabilityPercent,
+        count: data.disabilityCount,
+        color: getChoroplethColor(data.disabilityPercent),
+        data,
+      };
+    });
+
+    if (!searchQuery.trim()) {
+      return list.sort((a, b) => a.displayName.localeCompare(b.displayName));
+    }
+    const q = searchQuery.toLowerCase().trim();
+    return list.filter(
+      (s) =>
+        s.displayName.toLowerCase().includes(q) ||
+        s.englishName.toLowerCase().includes(q)
+    );
+  }, [lang, searchQuery]);
+
+  const selectedData = useMemo(() => {
+    if (!selectedState) return null;
+    const raw = INDIA_INCLUSION_DATA[selectedState];
+    if (!raw) return null;
+    const stateTrans = STATE_NAMES[selectedState];
+    const name = stateTrans ? (stateTrans[lang] || selectedState) : selectedState;
+    return { name, ...raw };
+  }, [selectedState, lang]);
+
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    const map = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      center: [78.9629, 22.5937],
+      zoom: 4.2,
+      minZoom: 3,
+      maxZoom: 10,
+    });
+
+    mapRef.current = map;
+
+    map.on('load', async () => {
+      try {
+        const res = await fetch('/india-states.geojson');
+        const geojson = await res.json();
+
+        map.addSource('india-states', {
+          type: 'geojson',
+          data: geojson,
+          generateId: true,
+        });
+
+        const stops = Object.entries(INDIA_INCLUSION_DATA).map(([name, data]) => [
+          name,
+          getChoroplethColor(data.disabilityPercent),
+        ]);
+
+        map.addLayer({
+          id: 'states-fill',
+          type: 'fill',
+          source: 'india-states',
+          paint: {
+            'fill-color': [
+              'match',
+              ['get', 'ST_NM'],
+              ...stops.flat(),
+              '#e0e7ff',
+            ],
+            'fill-opacity': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              0.95,
+              ['boolean', ['feature-state', 'selected'], false],
+              1.0,
+              0.8,
+            ],
+          },
+        });
+
+        map.addLayer({
+          id: 'states-borders',
+          type: 'line',
+          source: 'india-states',
+          paint: {
+            'line-color': [
+              'case',
+              ['boolean', ['feature-state', 'selected'], false],
+              '#4c1d95',
+              '#ffffff',
+            ],
+            'line-width': [
+              'case',
+              ['boolean', ['feature-state', 'selected'], false],
+              3,
+              1.2,
+            ],
+          },
+        });
+
+        let hoveredId = null;
+
+        map.on('mousemove', 'states-fill', (e) => {
+          if (e.features && e.features.length > 0) {
+            map.getCanvas().style.cursor = 'pointer';
+            if (hoveredId !== null) {
+              map.setFeatureState({ source: 'india-states', id: hoveredId }, { hover: false });
+            }
+            hoveredId = e.features[0].id;
+            map.setFeatureState({ source: 'india-states', id: hoveredId }, { hover: true });
+          }
+        });
+
+        map.on('mouseleave', 'states-fill', () => {
+          map.getCanvas().style.cursor = '';
+          if (hoveredId !== null) {
+            map.setFeatureState({ source: 'india-states', id: hoveredId }, { hover: false });
+            hoveredId = null;
+          }
+        });
+
+        map.on('click', 'states-fill', (e) => {
+          if (e.features && e.features.length > 0) {
+            const stName = e.features[0].properties.ST_NM;
+            const fid = e.features[0].id;
+
+            if (selectedFeatureIdRef.current !== null) {
+              map.setFeatureState(
+                { source: 'india-states', id: selectedFeatureIdRef.current },
+                { selected: false }
+              );
+            }
+            selectedFeatureIdRef.current = fid;
+            map.setFeatureState({ source: 'india-states', id: fid }, { selected: true });
+
+            setSelectedState(stName);
+          }
+        });
+
+        // Fit India bounds nicely
+        map.fitBounds([[68.0, 6.5], [97.5, 37.5]], { padding: 30, duration: 1000 });
+      } catch (err) {
+        console.error('Error loading GeoJSON:', err);
+      }
+    });
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  const handleStateClick = (stateName) => {
+    setSelectedState(stateName);
+    const coords = STATE_CENTROIDS[stateName];
+    if (coords && mapRef.current) {
+      mapRef.current.flyTo({
+        center: coords,
+        zoom: 6,
+        duration: 1200,
+      });
+    }
   };
 
-  const activeData = stateDirectories[selectedState] || stateDirectories["DEFAULT"];
-  
-  let activeName = activeData.name;
-  if (lang === "hi") activeName = activeData.hindiName || activeData.name;
-  if (lang === "kn") activeName = activeData.kannadaName || activeData.name;
-
   return (
-    <div className="panel-layout-split">
-      
-      {/* SVG Map Section */}
-      <div className="panel-card" style={{ flex: 1.2 }}>
-        <div className="card-header">
-          <h3><i className="fa-solid fa-map"></i> India Inclusion Map</h3>
+    <div className="flex flex-col h-[750px] w-full bg-slate-900 text-white rounded-2xl overflow-hidden shadow-2xl border border-slate-800 relative">
+      {/* Top Banner */}
+      <div className="bg-slate-800/90 border-b border-slate-700/80 px-6 py-4 flex items-center justify-between z-10 backdrop-blur">
+        <div>
+          <h2 className="text-xl font-bold text-indigo-400 flex items-center gap-2">
+            <span>🗺️</span> {ui.title}
+          </h2>
+          <p className="text-xs text-slate-400">
+            {ui.subtitle} • Census of India 2011 (C-20 / C-16) & DEPwD Schemes
+          </p>
         </div>
-        <div className="card-body" style={{ background: 'rgba(10,11,16,0.3)', overflow: 'auto' }}>
-          <svg className="india-svg" viewBox="0 0 650 780" xmlns="http://www.w3.org/2000/svg">
-            {/* Jammu and Kashmir */}
-            <path 
-              d="M 288,142 L 310,105 L 324,84 L 320,58 L 328,52 L 356,58 L 374,78 L 374,106 L 348,138 L 330,166 L 312,176 L 288,178 L 278,162 Z" 
-              className={`map-state ${selectedState === 'JK' ? 'active' : ''}`}
-              onClick={() => handleStateClick("JK")}
-            />
-            {/* Himachal Pradesh */}
-            <path 
-              d="M 312,176 L 330,166 L 348,176 L 366,172 L 368,198 L 348,214 L 328,212 L 316,192 Z" 
-              className={`map-state ${selectedState === 'HP' ? 'active' : ''}`}
-              onClick={() => handleStateClick("HP")}
-            />
-            {/* Punjab */}
-            <path 
-              d="M 278,206 L 288,178 L 312,176 L 316,192 L 328,212 L 316,236 L 286,242 L 266,218 Z" 
-              className={`map-state ${selectedState === 'PB' ? 'active' : ''}`}
-              onClick={() => handleStateClick("PB")}
-            />
-            {/* Uttarakhand */}
-            <path 
-              d="M 348,214 L 368,198 L 386,220 L 402,238 L 390,266 L 368,266 L 356,248 L 346,232 Z" 
-              className={`map-state ${selectedState === 'UK' ? 'active' : ''}`}
-              onClick={() => handleStateClick("UK")}
-            />
-            {/* Haryana and Delhi */}
-            <path 
-              d="M 306,236 L 328,212 L 348,214 L 346,232 L 356,248 L 354,268 L 342,284 L 318,284 Z" 
-              className={`map-state ${selectedState === 'HR' ? 'active' : ''}`}
-              onClick={() => handleStateClick("HR")}
-            />
-            {/* Rajasthan */}
-            <path 
-              d="M 174,334 L 212,284 L 266,218 L 286,242 L 306,236 L 318,284 L 342,284 L 326,356 L 314,394 L 294,402 L 244,402 L 202,374 Z" 
-              className={`map-state ${selectedState === 'RJ' ? 'active' : ''}`}
-              onClick={() => handleStateClick("RJ")}
-            />
-            {/* Gujarat */}
-            <path 
-              d="M 128,426 L 178,416 L 202,374 L 244,402 L 246,456 L 242,504 L 218,506 L 190,472 L 164,484 L 144,466 Z" 
-              className={`map-state ${selectedState === 'GJ' ? 'active' : ''}`}
-              onClick={() => handleStateClick("GJ")}
-            />
-            {/* Madhya Pradesh */}
-            <path 
-              d="M 244,402 L 294,402 L 314,394 L 326,356 L 342,284 L 354,268 L 368,266 L 394,324 L 422,336 L 432,364 L 416,400 L 438,446 L 400,478 L 354,472 L 306,494 L 246,456 Z" 
-              className={`map-state ${selectedState === 'MP' ? 'active' : ''}`}
-              onClick={() => handleStateClick("MP")}
-            />
-            {/* Uttar Pradesh */}
-            <path 
-              d="M 354,268 L 368,266 L 390,266 L 402,238 L 432,260 L 486,298 L 514,310 L 504,334 L 458,374 L 428,374 L 416,400 L 432,364 L 422,336 L 394,324 L 354,268 Z" 
-              className={`map-state ${selectedState === 'UP' ? 'active' : ''}`}
-              onClick={() => handleStateClick("UP")}
-            />
-            {/* Maharashtra */}
-            <path 
-              d="M 218,506 L 242,504 L 246,456 L 306,494 L 354,472 L 372,508 L 386,554 L 368,582 L 332,606 L 298,602 L 260,598 L 244,562 Z" 
-              className={`map-state ${selectedState === 'MH' ? 'active' : ''}`}
-              onClick={() => handleStateClick("MH")}
-            />
-            {/* Bihar */}
-            <path 
-              d="M 504,334 L 544,306 L 574,332 L 568,374 L 524,386 L 498,372 Z" 
-              className={`map-state ${selectedState === 'BR' ? 'active' : ''}`}
-              onClick={() => handleStateClick("BR")}
-            />
-            {/* Jharkhand */}
-            <path 
-              d="M 524,386 L 568,374 L 576,420 L 532,456 L 506,442 Z" 
-              className={`map-state ${selectedState === 'JH' ? 'active' : ''}`}
-              onClick={() => handleStateClick("JH")}
-            />
-            {/* West Bengal */}
-            <path 
-              d="M 574,332 L 592,324 L 602,362 L 590,396 L 580,446 L 584,484 L 562,476 L 556,450 L 576,420 L 568,374 Z" 
-              className={`map-state ${selectedState === 'WB' ? 'active' : ''}`}
-              onClick={() => handleStateClick("WB")}
-            />
-            {/* Odisha */}
-            <path 
-              d="M 492,488 L 532,456 L 576,420 L 556,450 L 562,476 L 548,528 L 496,554 L 468,524 Z" 
-              className={`map-state ${selectedState === 'OD' ? 'active' : ''}`}
-              onClick={() => handleStateClick("OD")}
-            />
-            {/* Chhattisgarh */}
-            <path 
-              d="M 400,478 L 438,446 L 458,452 L 492,488 L 468,524 L 456,584 L 414,548 Z" 
-              className={`map-state ${selectedState === 'CG' ? 'active' : ''}`}
-              onClick={() => handleStateClick("CG")}
-            />
-            {/* Telangana */}
-            <path 
-              d="M 372,508 L 400,478 L 414,548 L 456,584 L 416,616 L 386,590 Z" 
-              className={`map-state ${selectedState === 'TS' ? 'active' : ''}`}
-              onClick={() => handleStateClick("TS")}
-            />
-            {/* Andhra Pradesh */}
-            <path 
-              d="M 386,590 L 416,616 L 456,584 L 496,554 L 448,702 L 412,714 L 396,664 Z" 
-              className={`map-state ${selectedState === 'AP' ? 'active' : ''}`}
-              onClick={() => handleStateClick("AP")}
-            />
-            {/* Karnataka */}
-            <path 
-              d="M 260,598 L 298,602 L 332,606 L 368,582 L 386,590 L 396,664 L 412,714 L 378,720 L 354,722 L 342,704 L 318,658 Z" 
-              className={`map-state state-neon-home ${selectedState === 'KA' ? 'active' : ''}`}
-              onClick={() => handleStateClick("KA")}
-            />
-            {/* Goa */}
-            <path 
-              d="M 280,642 L 294,642 L 292,652 L 280,650 Z" 
-              className={`map-state ${selectedState === 'GA' ? 'active' : ''}`}
-              onClick={() => handleStateClick("GA")}
-            />
-            {/* Kerala */}
-            <path 
-              d="M 342,704 L 354,722 L 356,762 L 342,764 L 326,718 Z" 
-              className={`map-state ${selectedState === 'KL' ? 'active' : ''}`}
-              onClick={() => handleStateClick("KL")}
-            />
-            {/* Tamil Nadu */}
-            <path 
-              d="M 354,722 L 378,720 L 412,714 L 420,746 L 386,778 L 356,762 Z" 
-              className={`map-state ${selectedState === 'TN' ? 'active' : ''}`}
-              onClick={() => handleStateClick("TN")}
-            />
-            {/* Northeast Group */}
-            <path 
-              d="M 602,362 L 632,342 L 648,374 L 644,416 L 612,410 Z" 
-              className={`map-state ${selectedState === 'NE' ? 'active' : ''}`}
-              onClick={() => handleStateClick("NE")}
-            />
-
-            <text x="290" y="650" fill="var(--neon-green)" fontSize="13" fontWeight="bold" pointerEvents="none">KA</text>
-          </svg>
-        </div>
+        <button
+          onClick={() => {
+            if (mapRef.current) {
+              mapRef.current.fitBounds([[68.0, 6.5], [97.5, 37.5]], { padding: 30, duration: 1000 });
+            }
+          }}
+          className="px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 rounded-lg transition"
+        >
+          🇮🇳 Reset View
+        </button>
       </div>
 
-      {/* Directory Helplines Section */}
-      <div className="panel-card">
-        <div className="card-header">
-          <h3><i className="fa-solid fa-address-book"></i> Help Directory</h3>
-        </div>
-        
-        <div className="card-body">
-          <div className="directory-list-box" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            
-            <div className="selected-state-banner">
-              <span>{t("txt-selected-state-label") || "State:"}</span>
-              <strong>{activeName} ({selectedState})</strong>
-            </div>
+      {/* Main Map & Directory Grid */}
+      <div className="flex-1 flex flex-col md:flex-row relative overflow-hidden">
+        {/* Map Viewport */}
+        <div ref={mapContainerRef} className="flex-1 w-full h-full min-h-[400px]" />
 
-            <div className="accessibility-score-badge">
-              <span>{t("txt-state-score-label") || "Index:"}</span>
-              <strong>{activeData.score}</strong>
-            </div>
-
-            <hr style={{ border: 'none', borderTop: '1.5px dashed rgba(255,255,255,0.1)' }} />
-            
-            <h4 style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>
-              <i className="fa-solid fa-phone-volume" style={{ color: 'var(--neon-cyan)', marginRight: '6px' }}></i> Helplines:
-            </h4>
-            
-            <ul className="helpline-contact-list">
-              {activeData.contacts.map((contact, i) => (
-                <li key={i} onClick={() => {
-                  speakFeedback(`Calling ${contact.label} at ${contact.phone}`);
-                  window.location.href = `tel:${contact.phone}`;
-                }}>
-                  <strong>{contact.label}:</strong>
-                  <span style={{ color: 'var(--neon-cyan)' }}>{contact.phone}</span>
-                </li>
-              ))}
-            </ul>
-
-            <hr style={{ border: 'none', borderTop: '1.5px dashed rgba(255,255,255,0.1)' }} />
-
-            <h4 style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>
-              <i className="fa-solid fa-file-pdf" style={{ color: 'var(--neon-magenta)', marginRight: '6px' }}></i> Forms & Guidelines:
-            </h4>
-
-            <div className="pdf-download-links" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {activeData.downloads.map((dl, i) => (
-                <a 
-                  key={i} 
-                  href="#" 
-                  className="pdf-link-btn"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    speakFeedback(`Downloading ${dl.label}`);
-                    alert(`Mock PDF Download Triggered: "${dl.file}"`);
-                  }}
-                >
-                  <i className="fa-solid fa-file-arrow-down"></i>
-                  <span>{dl.label}</span>
-                </a>
-              ))}
-            </div>
-
+        {/* Floating / Collapsible Sidebar */}
+        <div
+          className={`transition-all duration-300 flex flex-col bg-slate-900/95 border-l border-slate-800 backdrop-blur z-10 ${
+            isSidebarOpen ? 'w-full md:w-96' : 'w-12'
+          }`}
+        >
+          <div className="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-800/40">
+            {isSidebarOpen && (
+              <span className="text-sm font-semibold text-slate-200">
+                {ui.searchState}
+              </span>
+            )}
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-1.5 text-slate-400 hover:text-white rounded-md bg-slate-800 hover:bg-slate-700 text-xs"
+              title="Toggle Sidebar"
+            >
+              {isSidebarOpen ? '▶' : '◀'}
+            </button>
           </div>
-        </div>
-      </div>
 
+          {isSidebarOpen && (
+            <div className="flex-1 flex flex-col overflow-hidden p-3 gap-3">
+              {/* Search Bar */}
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search state / राज्य / ರಾಜ್ಯ..."
+                className="w-full px-3 py-2 text-xs bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              />
+
+              {/* State List Directory */}
+              <div className="flex-1 overflow-y-auto pr-1 space-y-1.5">
+                {stateList.map((st) => (
+                  <button
+                    key={st.id}
+                    onClick={() => handleStateClick(st.englishName)}
+                    className={`w-full flex items-center justify-between p-2 rounded-lg text-xs transition border text-left ${
+                      selectedState === st.englishName
+                        ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200 font-semibold'
+                        : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-3 h-3 rounded-full shrink-0"
+                        style={{ backgroundColor: st.color }}
+                      />
+                      <span className="truncate">{st.displayName}</span>
+                    </div>
+                    <span className="font-mono text-[11px] text-slate-400">
+                      {st.pct}%
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Selected State Detail Modal/Drawer */}
+        {selectedData && (
+          <div className="absolute bottom-4 left-4 right-4 md:right-auto md:w-[420px] max-h-[80%] bg-slate-900/95 border border-indigo-500/40 rounded-xl p-4 shadow-2xl backdrop-blur z-20 overflow-y-auto text-xs space-y-3 animate-fade-in">
+            <div className="flex items-start justify-between border-b border-slate-800 pb-2">
+              <div>
+                <h3 className="text-base font-bold text-indigo-300">
+                  {selectedData.name}
+                </h3>
+                <p className="text-[11px] text-slate-400">
+                  {ui.disabilityPop}: <span className="font-semibold text-white">{selectedData.disabilityCount}</span> ({selectedData.disabilityPercent}%)
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedState(null)}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Top Disabilities */}
+            <div>
+              <span className="font-semibold text-slate-300">{ui.topDisabilities}:</span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {selectedData.topDisabilities?.map((d, i) => (
+                  <span
+                    key={i}
+                    className="px-2 py-0.5 rounded bg-indigo-950/80 border border-indigo-800/60 text-indigo-300 text-[10px]"
+                  >
+                    {d}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Languages */}
+            <div>
+              <span className="font-semibold text-slate-300">{ui.languages}:</span>
+              <p className="text-slate-400 mt-0.5 text-[11px]">
+                {selectedData.languages?.join(", ")}
+              </p>
+            </div>
+
+            {/* Applicable Schemes */}
+            <div>
+              <span className="font-semibold text-slate-300">{ui.keySchemes}:</span>
+              <div className="space-y-1.5 mt-1">
+                {selectedData.applicableSchemes?.map((sid) => {
+                  const scheme = SCHEMES[sid];
+                  if (!scheme) return null;
+                  return (
+                    <div
+                      key={sid}
+                      className="p-2 rounded bg-slate-800/80 border border-slate-700/60"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-indigo-300 text-[11px]">
+                          {scheme.name}
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">
+                          {scheme.type}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        {scheme.desc}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

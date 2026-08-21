@@ -15,7 +15,8 @@ export default function TopNavbar({
     { id: 'panel-voice', labelKey: 'nav-voice' },
     { id: 'panel-map', labelKey: 'nav-map' },
     { id: 'panel-simulators', labelKey: 'nav-simulators' },
-    { id: 'panel-game', labelKey: 'nav-game' }
+    { id: 'panel-game', labelKey: 'nav-game' },
+    { id: 'panel-sign', labelKey: 'nav-sign' },
   ];
 
   return (

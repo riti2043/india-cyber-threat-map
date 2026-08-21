@@ -7,6 +7,7 @@ import VoiceSuite from './components/VoiceSuite';
 import InclusionMap from './components/InclusionMap';
 import Simulators from './components/Simulators';
 import GullyGame from './components/GullyGame';
+import SignDigitRecognizer from './components/SignDigitRecognizer';
 import ChatBotWidget from './components/ChatBotWidget';
 import DynamicBackground from './components/DynamicBackground';
 
@@ -326,6 +327,10 @@ export default function App() {
       handlePanelSwitch("panel-simulators");
       return "Routing visual feeds to simulation filters and hand gesture camera sensors.";
     }
+    if (text.includes("open sign") || text.includes("sign language") || text.includes("digits")) {
+      handlePanelSwitch("panel-sign");
+      return "Opening the webcam Sign Language Digit Recognizer. Ready for hand gesture inputs.";
+    }
     if (text.includes("open game") || text.includes("cricket") || text.includes("play")) {
       handlePanelSwitch("panel-game");
       return "Activating digital Gully Cricket audio beep emitters. Ready for match launch, Captain.";
@@ -635,6 +640,10 @@ export default function App() {
 
         <div className={`workspace-panel ${activePanel === 'panel-game' ? 'active' : ''}`}>
           <GullyGame t={t} isAuthenticated={isAuthenticated} speakFeedback={speakFeedback} activePanel={activePanel} />
+        </div>
+
+        <div className={`workspace-panel ${activePanel === 'panel-sign' ? 'active' : ''}`}>
+          <SignDigitRecognizer speakFeedback={speakFeedback} />
         </div>
 
       </main>
