@@ -18,13 +18,13 @@ export default function DungeonGame() {
 
   const currentLevel = LEVELS[currentLevelIndex];
 
-  const handleInteract = () => {
+  const handleInteract = React.useCallback(() => {
     if (!doorUnlocked && !isPuzzleOpen && !gameWon) {
       setIsPuzzleOpen(true);
     }
-  };
+  }, [doorUnlocked, isPuzzleOpen, gameWon]);
 
-  const handleExit = () => {
+  const handleExit = React.useCallback(() => {
     if (doorUnlocked) {
       if (currentLevelIndex < LEVELS.length - 1) {
         setCurrentLevelIndex(prev => prev + 1);
@@ -33,7 +33,7 @@ export default function DungeonGame() {
         setGameWon(true);
       }
     }
-  };
+  }, [doorUnlocked, currentLevelIndex]);
 
   const handlePuzzleSolved = () => {
     setIsPuzzleOpen(false);
