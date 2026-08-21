@@ -361,10 +361,10 @@ export default function App() {
   };
 
   const handleGoogleLogin = () => {
-    setUserName("Pavit S.");
-    setUserEmail("pavit@gmail.com");
+    setUserName("Guest User");
+    setUserEmail("guest@codefury.com");
     setIsSuccessBadgeVisible(true);
-    speakFeedback("Authenticated via Google. Welcome Pavit!");
+    speakFeedback("Authenticated via Google. Welcome Guest!");
   };
 
   const handleSaveProfile = () => {

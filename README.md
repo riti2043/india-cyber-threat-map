@@ -11,7 +11,7 @@ Since this is a standard React.js Vite application, follow these steps to instal
 1. Open your terminal of choice (CMD, PowerShell, or Git Bash).
 2. Navigate into the React project directory:
    ```bash
-   cd "c:\Users\pavit\Downloads\CPU_SchedulingAlgorithms-main (2)\aura-suite-react"
+   cd CodeFury-9.0
    ```
 3. Install the dependencies declared in `package.json`:
    ```bash
