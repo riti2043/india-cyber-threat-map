@@ -1,4 +1,5 @@
 import IndiaThreatMap from "@/components/IndiaThreatMap";
+import DungeonGame from "@/components/game/DungeonGame";
 
 export default function Home() {
   return (
@@ -8,6 +9,11 @@ export default function Home() {
       {/* Map container with explicit height as required by MapLibre */}
       <div className="h-[600px] w-full max-w-5xl rounded-xl overflow-hidden shadow-lg border border-zinc-200 dark:border-zinc-800">
         <IndiaThreatMap />
+      </div>
+
+      <div className="w-full max-w-5xl mt-16 mb-8">
+        <h2 className="text-3xl font-bold mb-8 text-zinc-900 dark:text-zinc-100 text-center">Mini-Game: Escape the Breach</h2>
+        <DungeonGame />
       </div>
     </div>
   );
