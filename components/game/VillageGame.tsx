@@ -29,19 +29,20 @@ export default function VillageGame() {
   }, []);
 
   return (
-    <div className="w-full max-w-[800px] mx-auto flex flex-col gap-4">
+    <div className="flex-1 flex flex-col w-full h-full relative" style={{ fontFamily: 'var(--font-pixel), monospace' }}>
+
       {/* HUD for Badges - Cozy Light Theme */}
-      <div className="bg-white p-4 rounded-xl shadow-md border border-slate-200 flex gap-4 overflow-x-auto items-center min-h-[80px]">
-         <span className="font-bold text-slate-700 whitespace-nowrap">🏆 My Badges:</span>
-         {badges.length === 0 && <span className="text-slate-400 italic">None yet. Explore the village!</span>}
+      <div className="absolute top-4 left-4 right-4 z-10 bg-[#e0d6c8] p-3 rounded-sm shadow-[4px_4px_0_0_rgba(0,0,0,1)] border-4 border-[#8c7a6b] flex gap-4 overflow-x-auto items-center min-h-[60px] max-w-[800px] mx-auto text-xl">
+         <span className="font-bold text-[#4a3b32] whitespace-nowrap">★ BADGES:</span>
+         {badges.length === 0 && <span className="text-[#8c7a6b] italic">NONE YET. EXPLORE!</span>}
          {badges.map(b => (
-            <span key={b} className="px-4 py-2 bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-300 rounded-full text-sm font-bold whitespace-nowrap shadow-sm">
-                🏅 {b}
+            <span key={b} className="px-3 py-1 bg-[#d4c5b0] text-[#4a3b32] border-2 border-[#8c7a6b] rounded-sm font-bold whitespace-nowrap">
+                ★ {b.toUpperCase()}
             </span>
          ))}
       </div>
 
-      <div className="border-4 border-slate-300 rounded-2xl overflow-hidden bg-sky-50 text-white relative h-[600px] shadow-xl">
+      <div className="flex-1 w-full relative">
         <PhaserGame
             onTrigger={handleTrigger}
             isTaskOpen={activeLocation !== null}
