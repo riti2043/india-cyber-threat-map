@@ -13,6 +13,47 @@ import DynamicBackground from './components/DynamicBackground';
 import Community from './components/Community';
 import BrailleLearning from './components/BrailleLearning';
 
+function SulabhaTitle() {
+  const words = ["Sulabha", "सुलभा", "ಸುಲಭ"];
+  const [index, setIndex] = React.useState(0);
+  const [subIndex, setSubIndex] = React.useState(0);
+  const [reverse, setReverse] = React.useState(false);
+  const [blink, setBlink] = React.useState(true);
+
+  // Typewriting effect loop
+  React.useEffect(() => {
+    if (subIndex === words[index].length + 1 && !reverse) {
+      const timeout = setTimeout(() => setReverse(true), 2500);
+      return () => clearTimeout(timeout);
+    }
+
+    if (subIndex === 0 && reverse) {
+      setReverse(false);
+      setIndex((prev) => (prev + 1) % words.length);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setSubIndex((prev) => prev + (reverse ? -1 : 1));
+    }, reverse ? 75 : 150);
+
+    return () => clearTimeout(timeout);
+  }, [subIndex, index, reverse]);
+
+  // Cursor blink effect
+  React.useEffect(() => {
+    const timeout = setTimeout(() => setBlink((prev) => !prev), 500);
+    return () => clearTimeout(timeout);
+  }, [blink]);
+
+  return (
+    <h1 style={{ fontSize: '2.5rem', fontWeight: '800', fontFamily: 'monospace', margin: 0, color: 'var(--neon-cyan)', textShadow: '0 0 10px rgba(0, 240, 255, 0.4)' }}>
+      {words[index].substring(0, subIndex)}
+      <span style={{ opacity: blink ? 1 : 0 }}>|</span>
+    </h1>
+  );
+}
+
 export default function App() {
   // Global Application State loading helper
   const savedProfile = (() => {
@@ -38,7 +79,7 @@ export default function App() {
   const [activePanel, setActivePanel] = useState("panel-dashboard");
   
   // Modal visibility
-  const [showAuthModal, setShowAuthModal] = useState(!savedProfile.isAuthenticated);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [isSuccessBadgeVisible, setIsSuccessBadgeVisible] = useState(false);
@@ -647,13 +688,17 @@ export default function App() {
 
           <div className={`workspace-panel ${activePanel === 'panel-map' ? 'active' : ''}`} style={{ display: activePanel === 'panel-map' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>
             <InclusionMap t={t} lang={lang} speakFeedback={speakFeedback} />
-            <hr style={{ border: 'none', borderTop: '3px solid var(--border)', margin: '10px 0' }} />
+          </div>
+
+          <div className={`workspace-panel ${activePanel === 'panel-community' ? 'active' : ''}`} style={{ display: activePanel === 'panel-community' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>
             <Community t={t} speakFeedback={speakFeedback} />
           </div>
 
           <div className={`workspace-panel ${activePanel === 'panel-simulators' ? 'active' : ''}`} style={{ display: activePanel === 'panel-simulators' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>
             <Simulators t={t} speakFeedback={speakFeedback} />
-            <hr style={{ border: 'none', borderTop: '3px solid var(--border)', margin: '10px 0' }} />
+          </div>
+
+          <div className={`workspace-panel ${activePanel === 'panel-braille' ? 'active' : ''}`} style={{ display: activePanel === 'panel-braille' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>
             <BrailleLearning />
           </div>
 

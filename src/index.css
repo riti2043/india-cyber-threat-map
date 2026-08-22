@@ -87,6 +87,63 @@ body {
     background: transparent;
 }
 
+.app {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-dark);
+    overflow: hidden;
+}
+
+.a11y-rail {
+    width: 60px;
+    height: 100vh;
+    background: rgba(10, 11, 20, 0.95);
+    border-right: 2px solid var(--neon-cyan);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    gap: 16px;
+    z-index: 1001;
+}
+
+.a11y-rail .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.1);
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.a11y-rail .icon:hover {
+    color: var(--neon-cyan);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 8px var(--neon-cyan);
+}
+
+.a11y-rail .expand {
+    margin-top: auto;
+    margin-bottom: 20px;
+    color: #94a3b8;
+    font-size: 1.2rem;
+}
+
+.main-col {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100vh;
+    overflow: hidden;
+}
+
 /* ================= TOP HORIZONTAL NAVIGATION BAR ================= */
 .top-navbar {
     height: 75px;

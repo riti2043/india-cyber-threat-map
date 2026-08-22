@@ -10,51 +10,54 @@ export default function Dashboard({
   SulabhaTitleComponent
 }) {
   
-  const cards = [
+  const toolsCards = [
     { 
       id: 'panel-reader', 
       icon: 'fa-file-contract', 
-      titleKey: 'card-reader-title', 
-      descKey: 'card-reader-desc', 
+      title: 'Smart Document Reader', 
+      desc: 'Scan documents, simplify technical words, and listen with karaoke highlights.', 
       themeClass: 'theme-purple',
       badgeNum: '01'
     },
     { 
       id: 'panel-voice', 
       icon: 'fa-microphone', 
-      titleKey: 'card-voice-title', 
-      descKey: 'card-voice-desc', 
+      title: 'Voice Assistant Suite', 
+      desc: 'Speak details to populate forms in English/Hindi/Kannada and compile PDFs.', 
       themeClass: 'theme-blue',
       badgeNum: '02'
-    },
-    { 
-      id: 'panel-map', 
-      icon: 'fa-map-location-dot', 
-      titleKey: 'card-map-title', 
-      descKey: 'card-map-desc', 
-      themeClass: 'theme-green',
-      badgeNum: '03'
-    },
+    }
+  ];
+
+  const learningCards = [
     { 
       id: 'panel-simulators', 
       icon: 'fa-eye-low-vision', 
-      titleKey: 'card-sims-title', 
-      descKey: 'card-sims-desc', 
+      title: 'Simulators & Gestures', 
+      desc: 'Test colorblind and dyslexia visual overrides. Input numbers via webcam sign detection.', 
       themeClass: 'theme-violet',
+      badgeNum: '03'
+    },
+    { 
+      id: 'panel-braille', 
+      icon: 'fa-braille', 
+      title: 'Braille Learning Module', 
+      desc: 'Self-paced interactive 6-dot explainer, alphabet walkthrough, and word builder.', 
+      themeClass: 'theme-green',
       badgeNum: '04'
     },
     { 
       id: 'panel-game', 
       icon: 'fa-gamepad', 
-      titleKey: 'card-game-title', 
-      descKey: 'card-game-desc', 
+      title: 'Digital Gully Cricket', 
+      desc: 'Inclusive street cricket for visually impaired. Play using rhythm beeps & voice hitting.', 
       themeClass: 'theme-magenta',
       badgeNum: '05'
     }
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '48px', width: '100%' }}>
       
       {/* 🌌 Split Hero Section */}
       <div className="hero-split-row">
@@ -100,21 +103,20 @@ export default function Dashboard({
 
       </div>
 
-      {/* 📂 Themes & Problem Statements Section */}
+      {/* 📂 Tools Section */}
       <div className="themes-section">
-        <div className="themes-header">
-          <span className="section-pre">EXPLORE ACCESSIBILITY</span>
-          <h3 className="section-title">Themes &amp; Inclusive Technologies</h3>
-          <p className="section-subtitle">Deploying real-world cognitive interfaces to bridge digital gaps.</p>
+        <div className="themes-header" style={{ marginBottom: '20px' }}>
+          <span className="section-pre" style={{ letterSpacing: '2px', fontWeight: 'bold', color: 'var(--neon-cyan)' }}>UTILITIES</span>
+          <h3 className="section-title" style={{ fontSize: '1.6rem', fontWeight: '800' }}>Welfare Tools</h3>
         </div>
 
-        {/* Responsive Grid layout matching symposium design */}
-        <div className="themes-grid-container">
-          {cards.map((card) => (
+        <div className="themes-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+          {toolsCards.map((card) => (
             <div 
               key={card.id} 
               className={`theme-cyber-card ${card.themeClass}`}
               onClick={() => onPanelSwitch(card.id)}
+              style={{ cursor: 'pointer' }}
             >
               <div className="theme-card-badge-row">
                 <div className="theme-card-icon-box">
@@ -122,12 +124,10 @@ export default function Dashboard({
                 </div>
                 <span className="theme-card-num">{card.badgeNum}</span>
               </div>
-
               <div className="theme-card-content">
-                <h4>{t(card.titleKey)}</h4>
-                <p>{t(card.descKey)}</p>
+                <h4>{card.title}</h4>
+                <p>{card.desc}</p>
               </div>
-
               <div className="theme-card-footer">
                 <button type="button" className="theme-read-more-btn">
                   Launch Tool <i className="fa-solid fa-arrow-right"></i>
@@ -135,6 +135,59 @@ export default function Dashboard({
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* 📂 Learning & Games Section */}
+      <div className="themes-section">
+        <div className="themes-header" style={{ marginBottom: '20px' }}>
+          <span className="section-pre" style={{ letterSpacing: '2px', fontWeight: 'bold', color: 'var(--neon-magenta)' }}>INTERACT</span>
+          <h3 className="section-title" style={{ fontSize: '1.6rem', fontWeight: '800' }}>Learning &amp; Games</h3>
+        </div>
+
+        <div className="themes-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+          {learningCards.map((card) => (
+            <div 
+              key={card.title} 
+              className={`theme-cyber-card ${card.themeClass}`}
+              onClick={() => onPanelSwitch(card.id)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="theme-card-badge-row">
+                <div className="theme-card-icon-box">
+                  <i className={`fa-solid ${card.icon}`}></i>
+                </div>
+                <span className="theme-card-num">{card.badgeNum}</span>
+              </div>
+              <div className="theme-card-content">
+                <h4>{card.title}</h4>
+                <p>{card.desc}</p>
+              </div>
+              <div className="theme-card-footer">
+                <button type="button" className="theme-read-more-btn">
+                  Open Module <i className="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 📂 Inclusion Map Banner Block */}
+      <div className="themes-section" style={{ border: '2px solid rgba(0, 240, 255, 0.15)', borderRadius: '12px', padding: '30px', background: 'rgba(0, 240, 255, 0.02)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+          <div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '800', margin: '0 0 8px', color: 'var(--neon-green)' }}>India Inclusion Map</h3>
+            <p style={{ margin: 0, color: '#94a3b8', maxWidth: '60ch' }}>See state-wise disabled welfare schemes, statistics, and helpline data directly.</p>
+          </div>
+          <button 
+            type="button" 
+            className="primary-btn" 
+            onClick={() => onPanelSwitch("panel-map")}
+            style={{ padding: '12px 28px', minHeight: '44px', fontWeight: 'bold' }}
+          >
+            Open Map &amp; Directory
+          </button>
         </div>
       </div>
 
