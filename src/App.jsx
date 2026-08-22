@@ -709,7 +709,7 @@ export default function App() {
           </div>
 
           <div className={`workspace-panel ${activePanel === 'panel-explore' ? 'active' : ''}`} style={{ display: activePanel === 'panel-explore' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>
-            <ExploreReels t={t} speakFeedback={speakFeedback} />
+            <ExploreReels t={t} speakFeedback={speakFeedback} activePanel={activePanel} />
           </div>
 
           <div className={`workspace-panel ${activePanel === 'panel-braille' ? 'active' : ''}`} style={{ display: activePanel === 'panel-braille' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>

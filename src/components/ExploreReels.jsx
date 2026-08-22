@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './ExploreReels.css';
 
-export default function ExploreReels({ t, speakFeedback }) {
+export default function ExploreReels({ t, speakFeedback, activePanel }) {
   const [currentReel, setCurrentReel] = useState(0);
   const containerRef = useRef(null);
 
@@ -132,15 +132,23 @@ export default function ExploreReels({ t, speakFeedback }) {
         <div className="reels-container" ref={containerRef}>
           {reels.map((reel, index) => (
             <div key={reel.id} className="reel-slide">
-              <div className="reel-video-wrapper">
-                 <iframe 
-                    className="reel-iframe"
-                    src={getEmbedUrl(reel.videoId, index === currentReel)}
-                    title={reel.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                 ></iframe>
-              </div>
+               <div className="reel-video-wrapper" style={{ background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                 {(activePanel === 'panel-explore' && index === currentReel) ? (
+                   <iframe 
+                      className="reel-iframe"
+                      src={getEmbedUrl(reel.videoId, true)}
+                      title={reel.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                   ></iframe>
+                 ) : (
+                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', cursor: 'pointer', padding: '20px', textAlign: 'center' }}>
+                     <i className="fa-solid fa-circle-play" style={{ fontSize: '3rem', color: 'var(--neon-magenta)', textShadow: '0 0 10px var(--neon-magenta)', marginBottom: '12px' }}></i>
+                     <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{reel.title}</span>
+                     <span style={{ fontSize: '0.7rem', color: '#888', marginTop: '6px' }}>Scroll to activate video</span>
+                   </div>
+                 )}
+               </div>
               
               <div className="reel-overlay-top">
                 {reel.category}
