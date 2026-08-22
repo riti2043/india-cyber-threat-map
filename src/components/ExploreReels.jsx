@@ -9,67 +9,67 @@ export default function ExploreReels({ t, speakFeedback }) {
   const reels = [
     {
       id: "web-a11y",
-      videoId: "20SHvU2PKsM", // W3C Introduction to Web Accessibility
+      videoId: "20SHvU2PKsM",
       title: "Introduction to Web Accessibility",
-      desc: "An introduction to why designing for everyone matters.",
-      hashtags: "#a11y #inclusion",
+      desc: "W3C introduction to web accessibility and standards that make the web work for everyone.",
+      hashtags: "#a11y #w3c #inclusion",
       category: "Basics"
     },
     {
-      id: "keyboard-compat",
-      videoId: "OQGpqltSju8", // W3C Keyboard Compatibility
-      title: "Keyboard Compatibility",
-      desc: "Why keyboard navigation is essential for users with motor disabilities.",
-      hashtags: "#keyboard #accessibility",
-      category: "Assistive Tech"
-    },
-    {
-      id: "color-contrast",
-      videoId: "wiW_2tQ1Y28", // W3C Colors with Good Contrast
-      title: "Colors with Good Contrast",
-      desc: "Understanding how good contrast helps people with visual impairments.",
-      hashtags: "#contrast #design",
-      category: "Vision"
-    },
-    {
-      id: "clear-layout",
-      videoId: "pP1rQ05B4O8", // W3C Clear Layout and Design
-      title: "Clear Layout and Design",
-      desc: "How clear, consistent design helps people with cognitive disabilities.",
-      hashtags: "#design #usability",
-      category: "Cognitive"
-    },
-    {
-      id: "video-captions",
-      videoId: "8Z3YnL0U0Hw", // W3C Video Captions
-      title: "Video Captions",
-      desc: "Captions are essential for deaf users, and helpful for everyone else.",
-      hashtags: "#captions #deaf",
-      category: "Hearing"
-    },
-    {
-      id: "voice-control",
-      videoId: "l93W79qM2vU", // W3C Voice Recognition
-      title: "Voice Recognition",
-      desc: "How users control computers and write text using only their voice.",
-      hashtags: "#voicecontrol #motor",
-      category: "Assistive Tech"
-    },
-    {
-      id: "text-to-speech",
-      videoId: "Xo-Vn1yKq7I", // W3C Text to Speech
-      title: "Text to Speech",
+      id: "screen-reader",
+      videoId: "dEbl5jvLKGQ",
+      title: "Screen Reader Demo",
       desc: "Watch how a blind user navigates a website using a screen reader.",
       hashtags: "#screenreader #blind",
+      category: "Assistive Tech"
+    },
+    {
+      id: "colorblind",
+      videoId: "FKSOe5NK_qQ",
+      title: "What It's Like To Be Color Blind",
+      desc: "A simulation of how colorblind people perceive the world differently.",
+      hashtags: "#colorblind #vision",
       category: "Vision"
     },
     {
-      id: "customizable-text",
-      videoId: "Fq1zVq_yFKI", // W3C Customizable Text
-      title: "Customizable Text",
-      desc: "Why allowing users to change fonts and spacing is important.",
-      hashtags: "#fonts #vision",
+      id: "sign-lang",
+      videoId: "0FcwzMq4iWg",
+      title: "25 ASL Signs You Need to Know",
+      desc: "Learn essential signs in American Sign Language for beginners.",
+      hashtags: "#ASL #deaf #signlanguage",
+      category: "Language"
+    },
+    {
+      id: "keyboard-a11y",
+      videoId: "uO8NJqAtMLM",
+      title: "Keyboard Accessibility Testing",
+      desc: "How to test and ensure your website works with keyboard-only navigation.",
+      hashtags: "#keyboard #testing",
+      category: "Testing"
+    },
+    {
+      id: "inclusive-design",
+      videoId: "i9hKX_MPaek",
+      title: "Inclusive Design Principles",
+      desc: "Key principles of inclusive design that benefit all users.",
+      hashtags: "#inclusivedesign #ux",
       category: "Design"
+    },
+    {
+      id: "assistive-tech",
+      videoId: "omjVM1lwkII",
+      title: "Assistive Technologies",
+      desc: "Overview of technologies that help people with disabilities interact with the digital world.",
+      hashtags: "#assistivetech #tools",
+      category: "Assistive Tech"
+    },
+    {
+      id: "disability-awareness",
+      videoId: "8GLCqa-L7Go",
+      title: "Disability Awareness Education",
+      desc: "Building awareness and understanding of disability in our communities.",
+      hashtags: "#awareness #education",
+      category: "Awareness"
     }
   ];
 
@@ -114,16 +114,15 @@ export default function ExploreReels({ t, speakFeedback }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Helper to extract proper YouTube URL
-  // Some IDs in the array might be full watch URLs or just IDs, need to normalize to embed format
-  const getEmbedUrl = (videoId) => {
+  // Helper to extract proper YouTube URL and conditionally autoplay
+  const getEmbedUrl = (videoId, isActive) => {
     let id = videoId;
     if (id.includes('v=')) {
       id = id.split('v=')[1].split('&')[0];
     }
-    // Autoplay logic can be tricky with iframes, especially multiple on one page.
-    // Standard embed for now.
-    return `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&controls=1`;
+    // Only autoplay if it's the currently active reel in view
+    const autoplayParam = isActive ? '&autoplay=1' : '&autoplay=0';
+    return `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&controls=1${autoplayParam}`;
   };
 
   return (
@@ -136,7 +135,7 @@ export default function ExploreReels({ t, speakFeedback }) {
               <div className="reel-video-wrapper">
                  <iframe 
                     className="reel-iframe"
-                    src={getEmbedUrl(reel.videoId)}
+                    src={getEmbedUrl(reel.videoId, index === currentReel)}
                     title={reel.title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
