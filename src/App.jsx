@@ -252,7 +252,7 @@ export default function App() {
   const handleVoiceCommand = (text) => {
     if (text.includes("scroll down") || text.includes("neeche") || text.includes("kelage")) {
       const reelsContainer = document.querySelector(".reels-container");
-      if (activePanel === "panel-simulators" && reelsContainer) {
+      if (activePanel === "panel-explore" && reelsContainer) {
         reelsContainer.scrollBy({ top: reelsContainer.clientHeight, behavior: 'smooth' });
       } else {
         const panel = document.querySelector(".workspace-panel.active");
@@ -260,7 +260,7 @@ export default function App() {
       }
     } else if (text.includes("scroll up") || text.includes("upar") || text.includes("mele")) {
       const reelsContainer = document.querySelector(".reels-container");
-      if (activePanel === "panel-simulators" && reelsContainer) {
+      if (activePanel === "panel-explore" && reelsContainer) {
         reelsContainer.scrollBy({ top: -reelsContainer.clientHeight, behavior: 'smooth' });
       } else {
         const panel = document.querySelector(".workspace-panel.active");
@@ -278,8 +278,8 @@ export default function App() {
       handlePanelSwitch("panel-voice");
     } else if (text.includes("open map") || text.includes("inclusion map")) {
       handlePanelSwitch("panel-map");
-    } else if (text.includes("open simulator") || text.includes("simulators")) {
-      handlePanelSwitch("panel-simulators");
+    } else if (text.includes("open explore") || text.includes("explore")) {
+      handlePanelSwitch("panel-explore");
     } else if (text.includes("open game") || text.includes("play cricket")) {
       handlePanelSwitch("panel-game");
     } else if (text.includes("open dashboard") || text.includes("go home")) {
@@ -706,7 +706,7 @@ export default function App() {
             <Community t={t} speakFeedback={speakFeedback} />
           </div>
 
-          <div className={`workspace-panel ${activePanel === 'panel-simulators' ? 'active' : ''}`} style={{ display: activePanel === 'panel-simulators' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>
+          <div className={`workspace-panel ${activePanel === 'panel-explore' ? 'active' : ''}`} style={{ display: activePanel === 'panel-explore' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>
             <ExploreReels t={t} speakFeedback={speakFeedback} />
           </div>
 

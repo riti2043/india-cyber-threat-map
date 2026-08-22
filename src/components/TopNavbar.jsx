@@ -12,7 +12,7 @@ export default function TopNavbar({
   
   const mainTabs = [
     { id: 'panel-dashboard', label: 'Home' },
-    { id: 'panel-simulators', label: 'Explore' }, 
+    { id: 'panel-explore', label: 'Explore' }, 
     { id: 'panel-community', label: 'Community' } 
   ];
 
