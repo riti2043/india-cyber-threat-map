@@ -12,7 +12,7 @@ export default function TopNavbar({
   
   const mainTabs = [
     { id: 'panel-dashboard', label: 'Home' },
-    { id: 'panel-map', label: 'Explore' }, 
+    { id: 'panel-simulators', label: 'Explore' }, 
     { id: 'panel-community', label: 'Community' } 
   ];
 
@@ -21,17 +21,17 @@ export default function TopNavbar({
       <div className="brand-row" style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', padding: '0 45px' }}>
         
         {/* Brand static name */}
-        <div className="brand" onClick={() => onPanelSwitch("panel-dashboard")} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div className="brand-mark" style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'var(--primary)', border: '2px solid var(--neon-cyan)', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontWeight: 'bold' }}>S</div>
-          <div>
-            <h1 style={{ fontSize: '1.2rem', margin: 0, color: '#fff' }}>Sulabha</h1>
-            <p className="sub" style={{ fontSize: '0.7rem', margin: 0, color: '#888' }}>A citizen-level inclusion portal</p>
+        <div className="brand" onClick={() => onPanelSwitch("panel-dashboard")} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="brand-mark" style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(0, 240, 255, 0.08)', border: '2px solid var(--neon-cyan)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', color: 'var(--neon-cyan)', fontSize: '1.3rem', textShadow: 'var(--text-glow-cyan)', boxShadow: '0 0 10px rgba(0, 240, 255, 0.2)' }}>S</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <h1 style={{ fontSize: '1.35rem', margin: 0, fontWeight: '800', color: '#fff', letterSpacing: '0.5px' }}>Sulabha</h1>
+            <p className="sub" style={{ fontSize: '0.7rem', margin: 0, color: '#8a99ad', fontWeight: '500' }}>A citizen-level inclusion portal</p>
           </div>
         </div>
 
         {/* Desktop Tab Navigation */}
         <nav className="main-nav">
-          <ul style={{ display: 'flex', gap: '20px', listStyle: 'none', margin: 0, padding: 0 }}>
+          <ul style={{ display: 'flex', gap: '36px', listStyle: 'none', margin: 0, padding: 0 }}>
             {mainTabs.map((tab) => (
               <li key={tab.id}>
                 <a 
@@ -40,8 +40,10 @@ export default function TopNavbar({
                     color: activePanel === tab.id ? 'var(--neon-cyan)' : '#94a3b8',
                     textDecoration: 'none',
                     fontWeight: 'bold',
-                    paddingBottom: '8px',
-                    borderBottom: activePanel === tab.id ? '2.5px solid var(--neon-cyan)' : '2.5px solid transparent'
+                    fontSize: '1.05rem',
+                    padding: '8px 12px',
+                    borderBottom: activePanel === tab.id ? '2.5px solid var(--neon-cyan)' : '2.5px solid transparent',
+                    transition: 'all 0.2s ease'
                   }}
                   onClick={(e) => {
                     e.preventDefault();

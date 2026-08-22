@@ -12,6 +12,7 @@ import ChatBotWidget from './components/ChatBotWidget';
 import DynamicBackground from './components/DynamicBackground';
 import Community from './components/Community';
 import BrailleLearning from './components/BrailleLearning';
+import ExploreReels from './components/ExploreReels';
 
 function SulabhaTitle() {
   const words = ["Sulabha", "सुलभा", "ಸುಲಭ"];
@@ -675,6 +676,7 @@ export default function App() {
               voiceNavEnabled={voiceNavEnabled}
               setVoiceNavEnabled={setVoiceNavEnabled}
               SulabhaTitleComponent={SulabhaTitle}
+              InclusionMapComponent={() => <InclusionMap t={t} lang={lang} speakFeedback={speakFeedback} />}
             />
           </div>
 
@@ -695,7 +697,7 @@ export default function App() {
           </div>
 
           <div className={`workspace-panel ${activePanel === 'panel-simulators' ? 'active' : ''}`} style={{ display: activePanel === 'panel-simulators' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>
-            <Simulators t={t} speakFeedback={speakFeedback} />
+            <ExploreReels t={t} speakFeedback={speakFeedback} />
           </div>
 
           <div className={`workspace-panel ${activePanel === 'panel-braille' ? 'active' : ''}`} style={{ display: activePanel === 'panel-braille' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>

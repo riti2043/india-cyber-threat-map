@@ -7,7 +7,8 @@ export default function Dashboard({
   onPanelSwitch, 
   voiceNavEnabled, 
   setVoiceNavEnabled,
-  SulabhaTitleComponent
+  SulabhaTitleComponent,
+  InclusionMapComponent
 }) {
   
   const toolsCards = [
@@ -31,10 +32,10 @@ export default function Dashboard({
 
   const learningCards = [
     { 
-      id: 'panel-simulators', 
-      icon: 'fa-eye-low-vision', 
-      title: 'Simulators & Gestures', 
-      desc: 'Test colorblind and dyslexia visual overrides. Input numbers via webcam sign detection.', 
+      id: 'panel-sign', 
+      icon: 'fa-hand', 
+      title: 'Sign-Digit Recognition', 
+      desc: 'Show a number 1-5 to your webcam to translate hand signs to text inputs.', 
       themeClass: 'theme-violet',
       badgeNum: '03'
     },
@@ -174,20 +175,13 @@ export default function Dashboard({
       </div>
 
       {/* 📂 Inclusion Map Banner Block */}
-      <div className="themes-section" style={{ border: '2px solid rgba(0, 240, 255, 0.15)', borderRadius: '12px', padding: '30px', background: 'rgba(0, 240, 255, 0.02)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-          <div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: '800', margin: '0 0 8px', color: 'var(--neon-green)' }}>India Inclusion Map</h3>
-            <p style={{ margin: 0, color: '#94a3b8', maxWidth: '60ch' }}>See state-wise disabled welfare schemes, statistics, and helpline data directly.</p>
-          </div>
-          <button 
-            type="button" 
-            className="primary-btn" 
-            onClick={() => onPanelSwitch("panel-map")}
-            style={{ padding: '12px 28px', minHeight: '44px', fontWeight: 'bold' }}
-          >
-            Open Map &amp; Directory
-          </button>
+      <div className="themes-section" style={{ border: '2px solid rgba(0, 240, 255, 0.15)', borderRadius: '12px', padding: '24px', background: 'rgba(0, 240, 255, 0.02)' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: '800', margin: '0 0 8px', color: 'var(--neon-green)' }}>India Inclusion Map</h3>
+          <p style={{ margin: 0, color: '#94a3b8', maxWidth: '60ch' }}>See state-wise disabled welfare schemes, statistics, and helpline data directly.</p>
+        </div>
+        <div style={{ height: '500px', width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.08)' }}>
+          {InclusionMapComponent && <InclusionMapComponent />}
         </div>
       </div>
 
