@@ -314,10 +314,6 @@ export default function GullyGame({ t, isAuthenticated, speakFeedback, activePan
   };
 
   const startMatch = () => {
-    if (!isAuthenticated) {
-      alert("Please login via Gateway before playing the cricket match.");
-      return;
-    }
     setScore(0);
     setWickets(0);
     setGameState("playing");
@@ -357,8 +353,28 @@ export default function GullyGame({ t, isAuthenticated, speakFeedback, activePan
         </div>
 
         <div className="card-body flex-center relative">
-          <canvas ref={canvasRef} id="gully-cricket-canvas"></canvas>
-          
+          <canvas
+            ref={canvasRef}
+            id="gully-cricket-canvas"
+            style={{ width: '100%', maxWidth: '420px', height: '240px', background: '#0c0e1b', borderRadius: '8px', display: 'block' }}
+          ></canvas>
+
+          {gameState === 'idle' && (
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', pointerEvents: 'none' }}>
+              <i className="fa-solid fa-cricket-bat-ball" style={{ fontSize: '2.5rem', color: 'var(--neon-cyan)', textShadow: '0 0 12px var(--neon-cyan)' }}></i>
+              <p style={{ color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center', margin: 0 }}>Press <strong style={{ color: 'var(--neon-cyan)' }}>Start Match</strong> to play</p>
+              <p style={{ color: '#64748b', fontSize: '0.7rem', margin: 0 }}>Use Spacebar or voice "Swing" to hit</p>
+            </div>
+          )}
+
+          {gameState === 'over' && (
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', pointerEvents: 'none' }}>
+              <i className="fa-solid fa-flag-checkered" style={{ fontSize: '2.5rem', color: 'var(--neon-magenta)', textShadow: '0 0 12px var(--neon-magenta)' }}></i>
+              <p style={{ color: '#fff', fontSize: '1rem', fontWeight: 'bold', margin: 0 }}>All Out!</p>
+              <p style={{ color: 'var(--neon-cyan)', fontSize: '1.2rem', fontWeight: '800', margin: 0 }}>Score: {score} runs</p>
+            </div>
+          )}
+
           <div className="game-beep-wave">
             <div className={`beep-node ${activeBeepBar ? 'active' : ''}`}></div>
             <span style={{ fontSize: '0.65rem', color: '#a0aabf' }}>Pitch Distance Beep Indicator</span>
