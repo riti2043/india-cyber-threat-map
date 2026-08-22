@@ -180,7 +180,7 @@ export default function Dashboard({
           <h3 style={{ fontSize: '1.5rem', fontWeight: '800', margin: '0 0 8px', color: 'var(--neon-green)' }}>India Inclusion Map</h3>
           <p style={{ margin: 0, color: '#94a3b8', maxWidth: '60ch' }}>See state-wise disabled welfare schemes, statistics, and helpline data directly.</p>
         </div>
-        <div style={{ height: '500px', width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.08)' }}>
           {InclusionMapComponent && <InclusionMapComponent />}
         </div>
       </div>
