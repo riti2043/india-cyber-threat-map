@@ -321,7 +321,9 @@ export default function App() {
     if (panelId === "panel-reader") title = "Document Reader";
     if (panelId === "panel-voice") title = "Voice Suite";
     if (panelId === "panel-map") title = "Inclusion Map";
-    if (panelId === "panel-simulators") title = "Simulators";
+    if (panelId === "panel-explore") title = "Explore Videos";
+    if (panelId === "panel-community") title = "Community Welfare Directory";
+    if (panelId === "panel-braille") title = "Braille Learning Module";
     if (panelId === "panel-game") title = "Gully Cricket Game";
     speakFeedback(title);
   };
