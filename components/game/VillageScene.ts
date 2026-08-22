@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 
 const TILE_SIZE = 40;
-const GRID_WIDTH = 20; // 800px
-const GRID_HEIGHT = 15; // 600px
+const GRID_WIDTH = 60; // 2400px
+const GRID_HEIGHT = 60; // 2400px
 
 export type LocationId = 'bank' | 'postoffice' | 'shop' | 'hospital' | 'gov' | 'bus';
 
@@ -13,22 +13,19 @@ interface LocationDef {
   y: number;
   w: number;
   h: number;
-  color: number;
+  floor: string;
   type: 'building' | 'open';
 }
 
 export const LOCATIONS: LocationDef[] = [
-  // 4 left side
-  { id: 'bank', name: 'Bank', x: 2, y: 1, w: 4, h: 3, color: 0x64748b, type: 'building' }, // grey
-  { id: 'postoffice', name: 'Post Office', x: 2, y: 5, w: 4, h: 3, color: 0xef4444, type: 'building' }, // red
-  { id: 'hospital', name: 'Hospital', x: 2, y: 9, w: 4, h: 3, color: 0xbae6fd, type: 'building' }, // light blue
+  // Expanded map layout
+  { id: 'bank', name: 'Bank', x: 10, y: 10, w: 8, h: 6, floor: 'marble', type: 'building' },
+  { id: 'postoffice', name: 'Post Office', x: 10, y: 25, w: 8, h: 6, floor: 'wood', type: 'building' },
+  { id: 'hospital', name: 'Hospital', x: 10, y: 40, w: 10, h: 8, floor: 'linoleum', type: 'building' },
 
-  // Right side
-  { id: 'shop', name: 'Kirana Shop', x: 14, y: 2, w: 4, h: 3, color: 0xeab308, type: 'building' }, // yellow
-  { id: 'gov', name: 'Government Office', x: 14, y: 7, w: 4, h: 3, color: 0xd4d4d8, type: 'building' }, // beige/tan
-
-  // Separate open area at bottom right
-  { id: 'bus', name: 'Bus Stand', x: 14, y: 12, w: 4, h: 2, color: 0x3b82f6, type: 'open' }, // Open air, blue roof hint
+  { id: 'shop', name: 'Kirana Shop', x: 40, y: 12, w: 6, h: 6, floor: 'wood', type: 'building' },
+  { id: 'gov', name: 'Gov Office', x: 40, y: 30, w: 8, h: 6, floor: 'marble', type: 'building' },
+  { id: 'bus', name: 'Bus Stand', x: 38, y: 45, w: 12, h: 4, floor: 'paving', type: 'open' },
 ];
 
 export class VillageScene extends Phaser.Scene {
@@ -48,25 +45,28 @@ export class VillageScene extends Phaser.Scene {
 
   preload() {
     const bp = process.env.NEXT_PUBLIC_BASE_PATH || '';
-    this.load.image('grass', bp + '/assets/grass_tile.png');
-    this.load.image('road', bp + '/assets/road_tile.png');
+    this.load.image('grass', bp + '/assets/grass_hd.png');
+    this.load.image('road', bp + '/assets/paving.png');
     this.load.image('doormat', bp + '/assets/doormat.png');
     this.load.image('tree', bp + '/assets/tree.png');
     this.load.image('bench', bp + '/assets/bench.png');
 
-    // Buildings
-    this.load.image('bldg_bank', bp + '/assets/bldg_bank.png');
-    this.load.image('bldg_postoffice', bp + '/assets/bldg_postoffice.png');
-    this.load.image('bldg_shop', bp + '/assets/bldg_shop.png');
-    this.load.image('bldg_hospital', bp + '/assets/bldg_hospital.png');
-    this.load.image('bldg_gov', bp + '/assets/bldg_gov.png');
-    this.load.image('bldg_bus', bp + '/assets/bldg_bus.png');
+    // Walls and Floors
+    this.load.image('wall_gray', bp + '/assets/wall_gray.png');
+    this.load.image('wall_red', bp + '/assets/wall_red.png');
+    this.load.image('floor_marble', bp + '/assets/floor_marble.png');
+    this.load.image('floor_wood', bp + '/assets/floor_wood.png');
+    this.load.image('floor_linoleum', bp + '/assets/floor_linoleum.png');
+    this.load.image('floor_paving', bp + '/assets/paving.png'); // reuse paving for bus stand
 
-    // Player Walk Cycle
-    this.load.image('player_0', bp + '/assets/player_walk_0.png');
-    this.load.image('player_1', bp + '/assets/player_walk_1.png');
-    this.load.image('player_2', bp + '/assets/player_walk_2.png');
-    this.load.image('player_3', bp + '/assets/player_walk_3.png');
+    this.load.image('prop_vending', bp + '/assets/prop_vending.png');
+    this.load.image('prop_sign', bp + '/assets/prop_sign.png');
+
+    // Player Walk Cycle (HD)
+    this.load.image('player_0', bp + '/assets/hero_0.png');
+    this.load.image('player_1', bp + '/assets/hero_1.png');
+    this.load.image('player_2', bp + '/assets/hero_2.png');
+    this.load.image('player_3', bp + '/assets/hero_3.png');
   }
 
   create() {
@@ -78,11 +78,14 @@ export class VillageScene extends Phaser.Scene {
     this.walls = this.physics.add.staticGroup();
     this.triggers = this.physics.add.staticGroup();
 
+    // Set bounds
+    this.physics.world.setBounds(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+
     // Draw Ground
     for (let x = 0; x < GRID_WIDTH; x++) {
       for (let y = 0; y < GRID_HEIGHT; y++) {
-        // Road in the middle (x = 8, 9, 10, 11)
-        if (x >= 8 && x <= 11) {
+        // Main Road in the middle (x = 24 to 34)
+        if (x >= 24 && x <= 34) {
             this.add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 'road').setDisplaySize(TILE_SIZE, TILE_SIZE);
         } else {
             this.add.image(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 'grass').setDisplaySize(TILE_SIZE, TILE_SIZE);
@@ -90,35 +93,100 @@ export class VillageScene extends Phaser.Scene {
       }
     }
 
-    // Add Ambient Scenery (Trees and Benches)
+    // Add Ambient Scenery (Trees, Benches, Props)
     const sceneryCoords = [
-        { x: 1, y: 14, type: 'tree' },
-        { x: 1, y: 0, type: 'tree' },
-        { x: 7, y: 3, type: 'tree' },
-        { x: 7, y: 11, type: 'tree' },
-        { x: 12, y: 1, type: 'tree' },
-        { x: 18, y: 5, type: 'tree' },
-        { x: 18, y: 10, type: 'tree' },
-        { x: 12, y: 14, type: 'bench' },
-        { x: 7, y: 14, type: 'bench' },
+        { x: 5, y: 5, type: 'tree' }, { x: 8, y: 8, type: 'tree' }, { x: 50, y: 5, type: 'tree' },
+        { x: 20, y: 20, type: 'tree' }, { x: 22, y: 40, type: 'tree' }, { x: 45, y: 50, type: 'tree' },
+        { x: 15, y: 55, type: 'tree' }, { x: 55, y: 25, type: 'tree' }, { x: 55, y: 35, type: 'tree' },
+        { x: 22, y: 12, type: 'bench' }, { x: 36, y: 32, type: 'bench' }, { x: 36, y: 15, type: 'prop_vending' },
     ];
     sceneryCoords.forEach(s => {
         const cx = s.x * TILE_SIZE + TILE_SIZE/2;
         const cy = s.y * TILE_SIZE + TILE_SIZE/2;
         if (s.type === 'tree') {
-            this.add.image(cx, cy - 20, 'tree').setDepth(10); // draw above player
+            this.add.image(cx, cy - 20, 'tree').setDepth(10);
         } else {
-            this.add.image(cx, cy, 'bench');
+            this.add.image(cx, cy, s.type).setDepth(2);
         }
     });
 
-    // Build Locations
+    // Build Locations (Open Interiors with tile walls and floors)
     LOCATIONS.forEach(loc => {
         const cx = loc.x * TILE_SIZE + (loc.w * TILE_SIZE) / 2;
         const cy = loc.y * TILE_SIZE + (loc.h * TILE_SIZE) / 2;
 
-        // Base structure (Sprite instead of rectangle)
-        this.add.image(cx, cy, `bldg_${loc.id}`).setDepth(1);
+        // Pick wall tile
+        const wallTex = (loc.id === 'postoffice' || loc.id === 'hospital') ? 'wall_red' : 'wall_gray';
+
+        if (loc.type === 'building') {
+            // Draw Floors
+            for (let i = 0; i < loc.w; i++) {
+                for (let j = 0; j < loc.h; j++) {
+                    const fx = (loc.x + i) * TILE_SIZE + TILE_SIZE / 2;
+                    const fy = (loc.y + j) * TILE_SIZE + TILE_SIZE / 2;
+                    this.add.image(fx, fy, `floor_${loc.floor}`).setDepth(0);
+                }
+            }
+
+            // Determine door position (middle of the wall facing the road)
+            // If building is on the left (x < 24), door is on the right wall.
+            // If building is on the right (x > 34), door is on the left wall.
+            const doorY = loc.y + Math.floor(loc.h / 2);
+            let doorX = -1;
+            if (loc.x < 24) {
+                doorX = loc.x + loc.w - 1; // Right wall
+            } else {
+                doorX = loc.x; // Left wall
+            }
+
+            // Draw Walls & Colliders
+            for (let i = 0; i < loc.w; i++) {
+                for (let j = 0; j < loc.h; j++) {
+                    // Only draw perimeter
+                    if (i === 0 || i === loc.w - 1 || j === 0 || j === loc.h - 1) {
+                        const wx = loc.x + i;
+                        const wy = loc.y + j;
+
+                        // Leave doorway open
+                        if (wx === doorX && wy === doorY) continue;
+
+                        const wxPx = wx * TILE_SIZE + TILE_SIZE / 2;
+                        const wyPx = wy * TILE_SIZE + TILE_SIZE / 2;
+
+                        this.add.image(wxPx, wyPx, wallTex).setDepth(2);
+
+                        const wallCol = this.walls.create(wxPx, wyPx, undefined) as Phaser.Physics.Arcade.Sprite;
+                        wallCol.setSize(TILE_SIZE, TILE_SIZE);
+                        wallCol.setVisible(false);
+                    }
+                }
+            }
+
+            // Trigger Mat inside the door
+            let txPx = doorX * TILE_SIZE + TILE_SIZE / 2;
+            let tyPx = doorY * TILE_SIZE + TILE_SIZE / 2;
+            this.add.image(txPx, tyPx, 'doormat').setDepth(1);
+
+            const trigger = this.triggers.create(txPx, tyPx, undefined) as Phaser.Physics.Arcade.Sprite;
+            trigger.setSize(TILE_SIZE, TILE_SIZE);
+            trigger.setVisible(false);
+            trigger.setData('locId', loc.id);
+
+        } else if (loc.type === 'open') {
+             // Draw Floors
+             for (let i = 0; i < loc.w; i++) {
+                for (let j = 0; j < loc.h; j++) {
+                    const fx = (loc.x + i) * TILE_SIZE + TILE_SIZE / 2;
+                    const fy = (loc.y + j) * TILE_SIZE + TILE_SIZE / 2;
+                    this.add.image(fx, fy, `floor_${loc.floor}`).setDepth(0);
+                }
+            }
+
+            const trigger = this.triggers.create(cx, cy, undefined) as Phaser.Physics.Arcade.Sprite;
+            trigger.setSize(loc.w * TILE_SIZE, loc.h * TILE_SIZE);
+            trigger.setVisible(false);
+            trigger.setData('locId', loc.id);
+        }
 
         // Icon label setup based on building type
         const icons: Record<string, string> = {
@@ -132,51 +200,26 @@ export class VillageScene extends Phaser.Scene {
         const iconChar = icons[loc.id] || '🏠';
 
         // Add Label & Icon above building
-        const labelY = cy - (loc.h * TILE_SIZE) / 2 - 15;
-        // White banner background for text readability
-        const textBg = this.add.rectangle(cx, labelY, loc.w * TILE_SIZE, 24, 0xffffff, 0.8).setDepth(2);
-        textBg.setStrokeStyle(2, 0x000000);
-        this.add.text(cx, labelY, `${iconChar} ${loc.name}`, { color: '#000', fontSize: '14px', fontStyle: 'bold' }).setOrigin(0.5).setDepth(2);
-
-        // Entrance / Trigger logic
-        if (loc.type === 'building') {
-            // Walls around the building so player can't walk through it
-            const wall = this.walls.create(cx, cy, undefined) as Phaser.Physics.Arcade.Sprite;
-            wall.setSize(loc.w * TILE_SIZE, loc.h * TILE_SIZE);
-            wall.setVisible(false);
-
-            // Door / Trigger Mat (always on the side facing the road)
-            let tx, ty;
-            if (loc.x < 8) {
-                // Left side building, door on right
-                tx = (loc.x + loc.w) * TILE_SIZE + TILE_SIZE/2;
-                ty = cy;
-            } else {
-                // Right side building, door on left
-                tx = (loc.x - 1) * TILE_SIZE + TILE_SIZE/2;
-                ty = cy;
-            }
-
-            // Draw Doormat Sprite
-            this.add.image(tx, ty, 'doormat');
-
-            const trigger = this.triggers.create(tx, ty, undefined) as Phaser.Physics.Arcade.Sprite;
-            trigger.setSize(TILE_SIZE, TILE_SIZE);
-            trigger.setVisible(false);
-            trigger.setData('locId', loc.id);
-
-        } else if (loc.type === 'open') {
-            // It doesn't have walls blocking you, the whole thing is a trigger
-            const trigger = this.triggers.create(cx, cy, undefined) as Phaser.Physics.Arcade.Sprite;
-            trigger.setSize(loc.w * TILE_SIZE, loc.h * TILE_SIZE);
-            trigger.setVisible(false);
-            trigger.setData('locId', loc.id);
-        }
+        const labelY = (loc.y * TILE_SIZE) - 15;
+        // Pixel style banner background for text readability
+        const textBg = this.add.rectangle(cx, labelY, loc.w * TILE_SIZE, 24, 0x1a1a24, 0.9).setDepth(4);
+        textBg.setStrokeStyle(2, 0xffffff);
+        this.add.text(cx, labelY, `${iconChar} ${loc.name}`, {
+            color: '#fff',
+            fontSize: '16px',
+            fontFamily: 'monospace',
+            fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(5);
     });
 
-    // Player starts on the road at the bottom
-    this.player = this.physics.add.sprite(10 * TILE_SIZE + TILE_SIZE/2, 14 * TILE_SIZE + TILE_SIZE/2, 'player_0') as any;
+    // Player starts on the road at the bottom (or near bank for testing)
+    this.player = this.physics.add.sprite(28 * TILE_SIZE + TILE_SIZE/2, 55 * TILE_SIZE + TILE_SIZE/2, 'player_0') as any;
     this.player.setDepth(5);
+
+    // Camera setup for massive map
+    this.cameras.main.setBounds(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+    this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
+    this.cameras.main.setZoom(1.5); // Retro RPG feel
 
     // Create walk animation
     this.anims.create({
@@ -247,9 +290,9 @@ export class VillageScene extends Phaser.Scene {
         }
     }
 
-    // World bounds
-    this.player.x = Phaser.Math.Clamp(this.player.x, TILE_SIZE/2, 800 - TILE_SIZE/2);
-    this.player.y = Phaser.Math.Clamp(this.player.y, TILE_SIZE/2, 600 - TILE_SIZE/2);
+    // World bounds (now handles massive map)
+    this.player.x = Phaser.Math.Clamp(this.player.x, TILE_SIZE/2, GRID_WIDTH * TILE_SIZE - TILE_SIZE/2);
+    this.player.y = Phaser.Math.Clamp(this.player.y, TILE_SIZE/2, GRID_HEIGHT * TILE_SIZE - TILE_SIZE/2);
 
     // Overlap checks
     let overlappingAny = false;

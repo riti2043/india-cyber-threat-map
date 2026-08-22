@@ -26,9 +26,15 @@ export default function PhaserGame({
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
         parent: containerRef.current,
-        width: 800,
-        height: 600,
-        backgroundColor: '#4ade80',
+        scale: {
+          mode: Phaser.Scale.RESIZE,
+          width: '100%',
+          height: '100%',
+        },
+        render: {
+          pixelArt: true,
+        },
+        backgroundColor: '#1a1a24',
         scene: [VillageScene],
         physics: {
           default: 'arcade',
