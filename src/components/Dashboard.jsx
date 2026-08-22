@@ -8,7 +8,8 @@ export default function Dashboard({
   voiceNavEnabled, 
   setVoiceNavEnabled,
   SulabhaTitleComponent,
-  InclusionMapComponent
+  InclusionMapComponent,
+  onLaunchVillageGame
 }) {
   
   const toolsCards = [
@@ -172,6 +173,28 @@ export default function Dashboard({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* 🎮 Digital Village Game Launch Banner */}
+      <div className="themes-section" style={{ border: '2px solid rgba(168,85,247,0.3)', borderRadius: '12px', padding: '24px', background: 'linear-gradient(135deg, rgba(168,85,247,0.06), rgba(56,189,248,0.04))', display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
+        <div style={{ fontSize: '3.5rem', lineHeight: 1 }}>🏘</div>
+        <div style={{ flex: 1, minWidth: '200px' }}>
+          <h3 style={{ fontSize: '1.4rem', fontWeight: '800', margin: '0 0 6px', color: '#a855f7' }}>Digital Gully — Village Game</h3>
+          <p style={{ margin: 0, color: '#94a3b8', maxWidth: '50ch', fontSize: '0.9rem' }}>
+            Walk through a fully interactive village — visit the Bank, Hospital, Post Office, Kirana Shop, Government Office, and Bus Stand. Complete real-world accessibility tasks and earn badges!
+          </p>
+          <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+            {['🏦 ATM Ready','✉ Form Filler','🏥 Appointment','🛒 UPI Pay','🏛 Scheme','🚌 Ticket'].map(b => (
+              <span key={b} style={{ padding: '2px 8px', background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.25)', borderRadius: '10px', color: '#c4b5fd', fontSize: '0.65rem', fontWeight: 'bold' }}>{b}</span>
+            ))}
+          </div>
+        </div>
+        <button
+          onClick={onLaunchVillageGame}
+          style={{ padding: '14px 28px', background: 'linear-gradient(135deg, #7c3aed, #2563eb)', border: 'none', borderRadius: '10px', color: '#fff', fontWeight: '800', fontSize: '1rem', cursor: 'pointer', boxShadow: '0 0 20px rgba(124,58,237,0.4)', whiteSpace: 'nowrap', flexShrink: 0 }}
+        >
+          🎮 Launch Game
+        </button>
       </div>
 
       {/* 📂 Inclusion Map Banner Block */}

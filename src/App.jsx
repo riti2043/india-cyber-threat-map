@@ -13,6 +13,7 @@ import DynamicBackground from './components/DynamicBackground';
 import Community from './components/Community';
 import BrailleLearning from './components/BrailleLearning';
 import ExploreReels from './components/ExploreReels';
+import VillageGame from './components/VillageGame/VillageGame';
 
 function SulabhaTitle() {
   const words = ["Sulabha", "सुलभा", "ಸುಲಭ"];
@@ -78,6 +79,7 @@ export default function App() {
   const [colorFilter, setColorFilter] = useState(savedProfile.colorFilter || "none");
   const [autoScrollSpeed, setAutoScrollSpeed] = useState(savedProfile.autoScrollSpeed || "none");
   const [activePanel, setActivePanel] = useState("panel-dashboard");
+  const [showVillageGame, setShowVillageGame] = useState(false);
   
   // Modal visibility
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -442,6 +444,11 @@ export default function App() {
   return (
     <div className="app">
       
+      {/* Fullscreen Village Game Overlay */}
+      {showVillageGame && (
+        <VillageGame onExit={() => setShowVillageGame(false)} />
+      )}
+
       {/* SVG Empathy Filters */}
       <svg style={{ display: 'none' }}>
         <defs>
@@ -689,6 +696,7 @@ export default function App() {
               setVoiceNavEnabled={setVoiceNavEnabled}
               SulabhaTitleComponent={SulabhaTitle}
               InclusionMapComponent={() => <InclusionMap t={t} lang={lang} speakFeedback={speakFeedback} />}
+              onLaunchVillageGame={() => setShowVillageGame(true)}
             />
           </div>
 
