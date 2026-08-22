@@ -251,11 +251,21 @@ export default function App() {
 
   const handleVoiceCommand = (text) => {
     if (text.includes("scroll down") || text.includes("neeche") || text.includes("kelage")) {
-      const panel = document.querySelector(".workspace-panel.active");
-      if (panel) panel.scrollBy({ top: 250, behavior: 'smooth' });
+      const reelsContainer = document.querySelector(".reels-container");
+      if (activePanel === "panel-simulators" && reelsContainer) {
+        reelsContainer.scrollBy({ top: reelsContainer.clientHeight, behavior: 'smooth' });
+      } else {
+        const panel = document.querySelector(".workspace-panel.active");
+        if (panel) panel.scrollBy({ top: 250, behavior: 'smooth' });
+      }
     } else if (text.includes("scroll up") || text.includes("upar") || text.includes("mele")) {
-      const panel = document.querySelector(".workspace-panel.active");
-      if (panel) panel.scrollBy({ top: -250, behavior: 'smooth' });
+      const reelsContainer = document.querySelector(".reels-container");
+      if (activePanel === "panel-simulators" && reelsContainer) {
+        reelsContainer.scrollBy({ top: -reelsContainer.clientHeight, behavior: 'smooth' });
+      } else {
+        const panel = document.querySelector(".workspace-panel.active");
+        if (panel) panel.scrollBy({ top: -250, behavior: 'smooth' });
+      }
     } else if (text.includes("scroll fast")) {
       setAutoScrollSpeed("fast");
     } else if (text.includes("scroll slow")) {
