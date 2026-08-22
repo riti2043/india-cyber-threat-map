@@ -1895,3 +1895,20 @@ body.light-mode .floating-back-to-top-btn {
 .focus\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
 .focus\:border-indigo-500:focus { border-color: var(--neon-cyan) !important; }
 
+/* MapLibre Canvas Container Position Overrides */
+.maplibregl-map {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+.maplibregl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+}
+
+
