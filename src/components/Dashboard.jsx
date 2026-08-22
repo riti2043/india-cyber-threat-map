@@ -6,7 +6,8 @@ export default function Dashboard({
   t, 
   onPanelSwitch, 
   voiceNavEnabled, 
-  setVoiceNavEnabled 
+  setVoiceNavEnabled,
+  SulabhaTitleComponent
 }) {
   
   const cards = [
@@ -60,8 +61,13 @@ export default function Dashboard({
         
         {/* Left Hero Description */}
         <div className="hero-text-block">
+          {SulabhaTitleComponent && (
+            <div style={{ marginBottom: '16px' }}>
+              <SulabhaTitleComponent />
+            </div>
+          )}
           <span className="hero-tagline">A CITIZEN LEVEL INCLUSION PORTAL</span>
-          <h2 className="hero-title">AURA SUITE 9.0</h2>
+          <h2 className="hero-title" style={{ marginTop: '8px' }}>SULABHA SUITE</h2>
           <p className="hero-subtitle">Code • Include • Empower</p>
           <p className="hero-desc">
             An immersive platform for cognitive accessibility, empowering disabled citizens with real-time multilingual document simplification, hands-free voice form filling, and spatial street cricket.

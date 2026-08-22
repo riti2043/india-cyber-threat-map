@@ -10,6 +10,8 @@ import GullyGame from './components/GullyGame';
 import SignDigitRecognizer from './components/SignDigitRecognizer';
 import ChatBotWidget from './components/ChatBotWidget';
 import DynamicBackground from './components/DynamicBackground';
+import Community from './components/Community';
+import BrailleLearning from './components/BrailleLearning';
 
 export default function App() {
   // Global Application State loading helper
@@ -384,8 +386,7 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
-      <DynamicBackground isDarkMode={isDarkMode} />
+    <div className="app">
       
       {/* SVG Empathy Filters */}
       <svg style={{ display: 'none' }}>
@@ -530,123 +531,147 @@ export default function App() {
         </div>
       )}
 
-      {/* Top Navigation Bar */}
-      <TopNavbar 
-        activePanel={activePanel} 
-        onPanelSwitch={handlePanelSwitch} 
-        t={t}
-        openAuthModal={() => {
-          setIsSuccessBadgeVisible(true);
-          setShowAuthModal(true);
-        }}
-        isDarkMode={isDarkMode}
-        setIsDarkMode={setIsDarkMode}
-      />
+      {/* Collapsible Left Side Accessibility rail (Desktop icon list / Mobile hidden rail) */}
+      <div className="a11y-rail">
+        <div className="icon" title="Magnification" onClick={() => setFontScale(fontScale >= 180 ? 100 : fontScale + 20)}>A+</div>
+        <div className="icon" title="Contrast Spectrum" onClick={() => {
+          const list = ["none", "protanopia", "deuteranopia", "tritanopia", "achromatopsia"];
+          const currIdx = list.indexOf(colorFilter);
+          setColorFilter(list[(currIdx + 1) % list.length]);
+        }}>◐</div>
+        <div className="icon" title="Dyslexia Font" style={dyslexiaMode ? { borderColor: 'var(--primary)', color: 'var(--primary)' } : {}} onClick={() => setDyslexiaMode(!dyslexiaMode)}>Aa</div>
+        <div className="icon" title="Auto Scroll" onClick={() => {
+          const list = ["none", "slow", "medium", "fast"];
+          const currIdx = list.indexOf(autoScrollSpeed);
+          setAutoScrollSpeed(list[(currIdx + 1) % list.length]);
+        }}>≋</div>
+        <div className="icon" title="Switch Language" onClick={() => {
+          const list = ["en", "hi", "kn"];
+          const currIdx = list.indexOf(lang);
+          setLang(list[(currIdx + 1) % list.length]);
+        }}>EN</div>
+        <div className="expand" style={{ cursor: 'pointer' }} onClick={() => setIsAccessDrawerOpen(!isAccessDrawerOpen)}>»</div>
+      </div>
 
-      {/* Floating Accessibility Trigger Widget */}
-      <button 
-        type="button" 
-        className="floating-accessibility-btn" 
-        onClick={() => setIsAccessDrawerOpen(!isAccessDrawerOpen)}
-        title="Open Accessibility Controls"
-      >
-        <i className="fa-solid fa-universal-access"></i>
-      </button>
+      <div className="main-col" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+        <TopNavbar 
+          activePanel={activePanel} 
+          onPanelSwitch={handlePanelSwitch} 
+          t={t}
+          openAuthModal={() => {
+            setIsSuccessBadgeVisible(true);
+            setShowAuthModal(true);
+          }}
+          isDarkMode={isDarkMode}
+          setIsDarkMode={setIsDarkMode}
+          toggleAccessDrawer={() => setIsAccessDrawerOpen(!isAccessDrawerOpen)}
+        />
 
-      {/* Collapsible Left Side Accessibility drawer */}
-      {isAccessDrawerOpen && (
-        <div className="accessibility-side-drawer">
-          <div className="drawer-header">
-            <h4><i className="fa-solid fa-universal-access"></i> Accessibility Console</h4>
-            <button type="button" onClick={() => setIsAccessDrawerOpen(false)} className="compact-close-btn">
-              <i className="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-          <div className="drawer-body">
-            
-            {/* Color Filter */}
-            <div className="drawer-group">
-              <label><i className="fa-solid fa-eye"></i> Colorblind Spectrum</label>
-              <select value={colorFilter} onChange={(e) => setColorFilter(e.target.value)}>
-                <option value="none">Normal Spectrum</option>
-                <option value="protanopia">Protanopia (Red-Blind)</option>
-                <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
-                <option value="tritanopia">Tritanopia (Blue-Blind)</option>
-                <option value="achromatopsia">Achromatopsia (Monochrome)</option>
-              </select>
+        {/* Collapsible Left Side Accessibility drawer */}
+        {isAccessDrawerOpen && (
+          <div className="accessibility-side-drawer">
+            <div className="drawer-header">
+              <h4>Accessibility Console</h4>
+              <button type="button" onClick={() => setIsAccessDrawerOpen(false)} className="compact-close-btn">
+                <i className="fa-solid fa-xmark"></i>
+              </button>
             </div>
-
-            {/* Dyslexia Mode */}
-            <div className="drawer-group switch-row-drawer">
-              <label><strong>Dyslexia Layout Font</strong></label>
-              <label className="switch">
-                <input type="checkbox" checked={dyslexiaMode} onChange={(e) => setDyslexiaMode(e.target.checked)} />
-                <span className="slider"></span>
-              </label>
-            </div>
-
-            {/* Text Sizing */}
-            <div className="drawer-group">
-              <label><i className="fa-solid fa-magnifying-glass-plus"></i> Text Magnification</label>
-              <div className="drawer-scale-adjuster">
-                <button type="button" onClick={() => setFontScale(Math.max(100, fontScale - 10))}>A-</button>
-                <span>{fontScale}%</span>
-                <button type="button" onClick={() => setFontScale(Math.min(180, fontScale + 10))}>A+</button>
+            <div className="drawer-body">
+              
+              {/* Color Filter */}
+              <div className="drawer-group">
+                <label>Colorblind Spectrum</label>
+                <select value={colorFilter} onChange={(e) => setColorFilter(e.target.value)}>
+                  <option value="none">Normal Spectrum</option>
+                  <option value="protanopia">Protanopia (Red-Blind)</option>
+                  <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
+                  <option value="tritanopia">Tritanopia (Blue-Blind)</option>
+                  <option value="achromatopsia">Achromatopsia (Monochrome)</option>
+                </select>
               </div>
-            </div>
 
-            {/* Language Selection */}
-            <div className="drawer-group">
-              <label><i className="fa-solid fa-language"></i> Language</label>
-              <div className="drawer-lang-buttons">
-                <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>English</button>
-                <button className={lang === 'hi' ? 'active' : ''} onClick={() => setLang('hi')}>हिन्दी</button>
-                <button className={lang === 'kn' ? 'active' : ''} onClick={() => setLang('kn')}>ಕನ್ನಡ</button>
+              {/* Dyslexia Mode */}
+              <div className="drawer-group switch-row-drawer">
+                <label><strong>Dyslexia Layout Font</strong></label>
+                <label className="switch">
+                  <input type="checkbox" checked={dyslexiaMode} onChange={(e) => setDyslexiaMode(e.target.checked)} />
+                  <span className="slider"></span>
+                </label>
               </div>
+
+              {/* Text Sizing */}
+              <div className="drawer-group">
+                <label>Text Magnification</label>
+                <div className="drawer-scale-adjuster">
+                  <button type="button" onClick={() => setFontScale(Math.max(100, fontScale - 10))}>A-</button>
+                  <span>{fontScale}%</span>
+                  <button type="button" onClick={() => setFontScale(Math.min(180, fontScale + 10))}>A+</button>
+                </div>
+              </div>
+
+              {/* Language Selection */}
+              <div className="drawer-group">
+                <label>Language</label>
+                <div className="drawer-lang-buttons">
+                  <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>English</button>
+                  <button className={lang === 'hi' ? 'active' : ''} onClick={() => setLang('hi')}>हिन्दी</button>
+                  <button className={lang === 'kn' ? 'active' : ''} onClick={() => setLang('kn')}>ಕನ್ನಡ</button>
+                </div>
+              </div>
+
             </div>
-
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Main Panel Viewport */}
-      <main className="main-workspace">
-        {/* Dynamic Workspace Panels */}
-        <div className={`workspace-panel ${activePanel === 'panel-dashboard' ? 'active' : ''}`}>
-          <Dashboard 
-            userName={userName} 
-            t={t} 
-            onPanelSwitch={handlePanelSwitch}
-            voiceNavEnabled={voiceNavEnabled}
-            setVoiceNavEnabled={setVoiceNavEnabled}
-          />
-        </div>
+        {/* Main Panel Viewport */}
+        <main className="main-workspace" style={{ flex: 1, overflowY: 'auto', padding: '32px 28px' }}>
+          {/* Dynamic Workspace Panels */}
+          <div className={`workspace-panel ${activePanel === 'panel-dashboard' ? 'active' : ''}`}>
+            <Dashboard 
+              userName={userName} 
+              t={t} 
+              onPanelSwitch={handlePanelSwitch}
+              voiceNavEnabled={voiceNavEnabled}
+              setVoiceNavEnabled={setVoiceNavEnabled}
+              SulabhaTitleComponent={SulabhaTitle}
+            />
+          </div>
 
-        <div className={`workspace-panel ${activePanel === 'panel-reader' ? 'active' : ''}`}>
-          <DocumentReader t={t} lang={lang} speakFeedback={speakFeedback} />
-        </div>
+          <div className={`workspace-panel ${activePanel === 'panel-reader' ? 'active' : ''}`}>
+            <DocumentReader t={t} lang={lang} speakFeedback={speakFeedback} />
+          </div>
 
-        <div className={`workspace-panel ${activePanel === 'panel-voice' ? 'active' : ''}`}>
-          <VoiceSuite t={t} lang={lang} speakFeedback={speakFeedback} />
-        </div>
+          <div className={`workspace-panel ${activePanel === 'panel-voice' ? 'active' : ''}`}>
+            <VoiceSuite t={t} lang={lang} speakFeedback={speakFeedback} />
+          </div>
 
-        <div className={`workspace-panel ${activePanel === 'panel-map' ? 'active' : ''}`}>
-          <InclusionMap t={t} lang={lang} speakFeedback={speakFeedback} />
-        </div>
+          <div className={`workspace-panel ${activePanel === 'panel-map' ? 'active' : ''}`} style={{ display: activePanel === 'panel-map' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>
+            <InclusionMap t={t} lang={lang} speakFeedback={speakFeedback} />
+            <hr style={{ border: 'none', borderTop: '3px solid var(--border)', margin: '10px 0' }} />
+            <Community t={t} speakFeedback={speakFeedback} />
+          </div>
 
-        <div className={`workspace-panel ${activePanel === 'panel-simulators' ? 'active' : ''}`}>
-          <Simulators t={t} speakFeedback={speakFeedback} />
-        </div>
+          <div className={`workspace-panel ${activePanel === 'panel-simulators' ? 'active' : ''}`} style={{ display: activePanel === 'panel-simulators' ? 'flex' : 'none', flexDirection: 'column', gap: '30px' }}>
+            <Simulators t={t} speakFeedback={speakFeedback} />
+            <hr style={{ border: 'none', borderTop: '3px solid var(--border)', margin: '10px 0' }} />
+            <BrailleLearning />
+          </div>
 
-        <div className={`workspace-panel ${activePanel === 'panel-game' ? 'active' : ''}`}>
-          <GullyGame t={t} isAuthenticated={isAuthenticated} speakFeedback={speakFeedback} activePanel={activePanel} />
-        </div>
+          <div className={`workspace-panel ${activePanel === 'panel-game' ? 'active' : ''}`}>
+            <GullyGame t={t} isAuthenticated={isAuthenticated} speakFeedback={speakFeedback} activePanel={activePanel} />
+          </div>
 
-        <div className={`workspace-panel ${activePanel === 'panel-sign' ? 'active' : ''}`}>
-          <SignDigitRecognizer speakFeedback={speakFeedback} />
-        </div>
+          <div className={`workspace-panel ${activePanel === 'panel-sign' ? 'active' : ''}`}>
+            <SignDigitRecognizer speakFeedback={speakFeedback} />
+          </div>
 
-      </main>
+          {/* Structured Footer below workspace panels */}
+          <footer style={{ marginTop: '48px', paddingTop: '20px', borderTop: '2px dashed var(--border)', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#666' }}>
+            <span>Sulabha Inclusion Portal &copy; 2026</span>
+            <span>Dedicated citizen accessibility interface</span>
+          </footer>
+
+        </main>
 
       {/* ================= OMNIPRESENT FLOATING CHAT COMPANION ================= */}
       {/* Floating Hologram Orb Button */}
@@ -693,6 +718,7 @@ export default function App() {
         <i className="fa-solid fa-chevron-up"></i>
       </button>
 
+      </div>
     </div>
   );
 }
